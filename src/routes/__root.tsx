@@ -1,10 +1,13 @@
+import { TanStackDevtools } from "@tanstack/react-devtools"
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
-import { TanStackDevtools } from "@tanstack/react-devtools"
 
+import { NotFound } from "@/components/not-found"
+import { Toaster } from "@/components/ui/sonner"
 import appCss from "../styles.css?url"
 
 export const Route = createRootRoute({
+  notFoundComponent: () => <NotFound />,
   head: () => ({
     meta: [
       {
@@ -47,6 +50,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             },
           ]}
         />
+        <Toaster richColors position="top-center" />
         <Scripts />
       </body>
     </html>

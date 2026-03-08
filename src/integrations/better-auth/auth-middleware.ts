@@ -11,7 +11,7 @@ export const authMiddleware = createMiddleware().server(async ({ next }) => {
   const session = await auth.api.getSession({ headers })
 
   if (!session) {
-    throw redirect({ to: "/" })
+    throw redirect({ to: "/login" })
   }
 
   return await next({
@@ -30,7 +30,7 @@ export const redirectIfAuthenticated = createMiddleware().server(
     const session = await auth.api.getSession({ headers })
 
     if (session) {
-      // throw redirect({ to: '/admin' })
+      throw redirect({ to: "/" })
     }
 
     return await next()
