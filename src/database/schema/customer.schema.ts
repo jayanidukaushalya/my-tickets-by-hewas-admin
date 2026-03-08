@@ -4,9 +4,10 @@ import { purchase } from "./purchase.schema"
 
 export const customer = pgTable("customer", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
   email: text("email").notNull().unique(),
-  password: text("password").notNull(),
+  firebaseUid: text("firebase_uid").unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
