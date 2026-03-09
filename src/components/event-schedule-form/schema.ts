@@ -28,8 +28,6 @@ export const eventFormSchema = z
     scheduleType: z.string().min(1, "Schedule type is required"),
     languages: z.string().optional(),
     description: z.string().optional(),
-    parentId: z.string().optional(),
-    isSubEvent: z.boolean(),
     venue: z.string().min(1, "Venue is required"),
     address: z.string().optional(),
     eventDates: z

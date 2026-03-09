@@ -37,14 +37,6 @@ export function StepReview() {
           <ReviewRow label="Event Type" value={eventTypeLabel} />
           <ReviewRow label="Schedule Type" value={scheduleLabel} />
           <ReviewRow label="Languages" value={values.languages || "—"} />
-          <ReviewRow
-            label="Hierarchy"
-            value={
-              values.isSubEvent
-                ? `Sub-event (Parent ID: ${values.parentId === "none" ? "Root" : values.parentId})`
-                : "Root Event"
-            }
-          />
           <ReviewRow label="Description" value={values.description || "—"} />
         </ReviewSection>
 
@@ -79,7 +71,7 @@ export function StepReview() {
                       className="size-3"
                       strokeWidth={2}
                     />
-                    {ts.startTime || "--:--"} — {ts.endTime || "--:--"}
+                    {ts.startTime} — {ts.endTime}
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {ts.tickets.map((ticket, tIdx) => (
@@ -92,8 +84,7 @@ export function StepReview() {
                           className="size-2.5"
                           strokeWidth={2}
                         />
-                        {ticket.name || "Unnamed"}: LKR {ticket.price || "0"} ×{" "}
-                        {ticket.qty || "0"}
+                        {ticket.name}: LKR {ticket.price} × {ticket.qty}
                       </span>
                     ))}
                   </div>

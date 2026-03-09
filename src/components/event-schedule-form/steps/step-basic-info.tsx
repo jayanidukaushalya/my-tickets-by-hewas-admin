@@ -1,7 +1,6 @@
 import {
   Field,
   FieldContent,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -14,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { Controller, useFormContext } from "react-hook-form"
@@ -212,82 +210,6 @@ export function StepBasicInfo() {
             />
           </FieldContent>
         </Field>
-
-        {/* Sub-Event Toggle & Parent Picker */}
-        <div className="space-y-4 rounded-2xl border border-border/30 bg-muted/10 p-4">
-          <Field
-            orientation="horizontal"
-            className="items-center justify-between"
-          >
-            <div className="space-y-0.5">
-              <FieldLabel
-                htmlFor="sub-event-toggle"
-                className="text-xs font-semibold tracking-tighter uppercase opacity-70"
-              >
-                Is this a sub-event?
-              </FieldLabel>
-              <FieldDescription className="text-[10px]">
-                Sub-events are nested under a main parent event.
-              </FieldDescription>
-            </div>
-            <Controller
-              name="isSubEvent"
-              control={control}
-              render={({ field }) => (
-                <Switch
-                  id="sub-event-toggle"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              )}
-            />
-          </Field>
-
-          <Controller
-            name="isSubEvent"
-            control={control}
-            render={({ field: isSub }) =>
-              isSub.value ? (
-                <Field
-                  orientation="vertical"
-                  className="animate-in duration-300 fade-in slide-in-from-top-2"
-                >
-                  <FieldLabel
-                    htmlFor="event-parent"
-                    className="text-xs font-semibold tracking-tighter uppercase opacity-70"
-                  >
-                    Parent Event
-                  </FieldLabel>
-                  <FieldContent>
-                    <Controller
-                      name="parentId"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="h-10 w-full border-border/30 bg-background/20 transition-colors focus:border-primary/50">
-                            <SelectValue placeholder="Select parent event" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {/* Populated from API */}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                    <p className="mt-1 text-[10px] text-muted-foreground">
-                      Only root events are listed. Sub-events support only one
-                      nested layer.
-                    </p>
-                  </FieldContent>
-                </Field>
-              ) : (
-                <></>
-              )
-            }
-          />
-        </div>
       </FieldGroup>
     </div>
   )

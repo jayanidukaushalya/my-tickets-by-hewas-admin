@@ -31,8 +31,6 @@ export function EventScheduleForm() {
       scheduleType: ScheduleType.ONE_TIME,
       languages: "",
       description: "",
-      parentId: "",
-      isSubEvent: false,
       venue: "",
       address: "",
       eventDates: [
@@ -57,13 +55,7 @@ export function EventScheduleForm() {
     async (step: number): Promise<boolean> => {
       switch (step) {
         case 0:
-          return trigger([
-            "name",
-            "image",
-            "eventType",
-            "scheduleType",
-            "isSubEvent",
-          ])
+          return trigger(["name", "image", "eventType", "scheduleType"])
         case 1: {
           const eventDates = watch("eventDates")
           const scheduleType = watch("scheduleType")
