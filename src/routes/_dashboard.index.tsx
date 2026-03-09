@@ -23,7 +23,7 @@ function DashboardComponent() {
     <>
       <DashboardHeader />
       <main className="flex-1 overflow-y-auto p-6">
-        <div className="mx-auto max-w-7xl animate-in space-y-8 duration-700 fade-in slide-in-from-bottom-4">
+        <div className="space-y-8">
           <div className="flex flex-col gap-1">
             <h1 className="text-3xl font-bold tracking-tight">
               Welcome back, {session?.user.name}

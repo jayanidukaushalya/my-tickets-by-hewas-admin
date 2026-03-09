@@ -1,5 +1,5 @@
-import "dotenv/config"
 import { auth } from "@/integrations/better-auth/auth"
+import "dotenv/config"
 
 async function seed() {
   console.log("🌱 Seeding admin user...")
@@ -18,17 +18,18 @@ async function seed() {
         },
       })
       console.log("✅ Admin user seeded successfully:", result.user.email)
-    } catch (error: any) {
+    } catch (error) {
       if (
-        error.code === "USER_ALREADY_EXISTS" ||
-        error.message?.includes("already exists")
+        error instanceof Error &&
+        (error.message?.includes("USER_ALREADY_EXISTS") ||
+          error.message?.includes("already exists"))
       ) {
         console.log("ℹ️ Admin user already exists.")
       } else {
         throw error
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error("❌ Failed to seed admin user:", error)
   }
 

@@ -12,8 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as DashboardIndexRouteImport } from './routes/_dashboard.index'
-import { Route as DashboardEventsRouteImport } from './routes/_dashboard.events'
+import { Route as DashboardEventsIndexRouteImport } from './routes/_dashboard.events.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as DashboardEventsScheduleRouteImport } from './routes/_dashboard.events.schedule'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -29,9 +30,9 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardEventsRoute = DashboardEventsRouteImport.update({
-  id: '/events',
-  path: '/events',
+const DashboardEventsIndexRoute = DashboardEventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
   getParentRoute: () => DashboardRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -39,39 +40,48 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardEventsScheduleRoute = DashboardEventsScheduleRouteImport.update({
+  id: '/events/schedule',
+  path: '/events/schedule',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof DashboardIndexRoute
   '/login': typeof LoginRoute
-  '/events': typeof DashboardEventsRoute
+  '/events/schedule': typeof DashboardEventsScheduleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/events/': typeof DashboardEventsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/events': typeof DashboardEventsRoute
   '/': typeof DashboardIndexRoute
+  '/events/schedule': typeof DashboardEventsScheduleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/events': typeof DashboardEventsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
-  '/_dashboard/events': typeof DashboardEventsRoute
   '/_dashboard/': typeof DashboardIndexRoute
+  '/_dashboard/events/schedule': typeof DashboardEventsScheduleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_dashboard/events/': typeof DashboardEventsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/events' | '/api/auth/$'
+  fullPaths: '/' | '/login' | '/events/schedule' | '/api/auth/$' | '/events/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/events' | '/' | '/api/auth/$'
+  to: '/login' | '/' | '/events/schedule' | '/api/auth/$' | '/events'
   id:
     | '__root__'
     | '/_dashboard'
     | '/login'
-    | '/_dashboard/events'
     | '/_dashboard/'
+    | '/_dashboard/events/schedule'
     | '/api/auth/$'
+    | '/_dashboard/events/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -103,11 +113,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/_dashboard/events': {
-      id: '/_dashboard/events'
+    '/_dashboard/events/': {
+      id: '/_dashboard/events/'
       path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof DashboardEventsRouteImport
+      fullPath: '/events/'
+      preLoaderRoute: typeof DashboardEventsIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/api/auth/$': {
@@ -117,17 +127,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_dashboard/events/schedule': {
+      id: '/_dashboard/events/schedule'
+      path: '/events/schedule'
+      fullPath: '/events/schedule'
+      preLoaderRoute: typeof DashboardEventsScheduleRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
 interface DashboardRouteChildren {
-  DashboardEventsRoute: typeof DashboardEventsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardEventsScheduleRoute: typeof DashboardEventsScheduleRoute
+  DashboardEventsIndexRoute: typeof DashboardEventsIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardEventsRoute: DashboardEventsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardEventsScheduleRoute: DashboardEventsScheduleRoute,
+  DashboardEventsIndexRoute: DashboardEventsIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

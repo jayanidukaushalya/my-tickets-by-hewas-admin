@@ -24,18 +24,26 @@ import {
 import { authClient } from "@/integrations/better-auth/auth-client"
 import {
   Calendar01Icon,
-  ChevronDoubleCloseIcon,
   DashboardSquare01Icon,
   Logout01Icon,
   Settings02Icon,
   ShoppingBag01Icon,
+  UnfoldMoreIcon,
   UserGroupIcon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Link, useLocation, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
-export function AppSidebar({ session }: { session: any }) {
+interface SidebarSession {
+  user: {
+    name?: string | null
+    email?: string | null
+    image?: string | null
+  }
+}
+
+export function AppSidebar({ session }: { session: SidebarSession | null }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -167,8 +175,8 @@ export function AppSidebar({ session }: { session: any }) {
                       </span>
                     </div>
                     <HugeiconsIcon
-                      icon={ChevronDoubleCloseIcon}
-                      className="size-4 rotate-90 opacity-50 transition-transform duration-200 group-data-[collapsible=icon]:hidden"
+                      icon={UnfoldMoreIcon}
+                      className="size-4 opacity-50 transition-transform duration-200 group-data-[collapsible=icon]:hidden"
                       strokeWidth={2}
                     />
                   </SidebarMenuButton>
