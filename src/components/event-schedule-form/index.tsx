@@ -35,7 +35,7 @@ export function EventScheduleForm({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
       name: "",
-      image: "",
+      image: [],
       eventType: "",
       scheduleType: ScheduleType.ONE_TIME,
       languages: "",

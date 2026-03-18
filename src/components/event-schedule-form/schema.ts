@@ -1,6 +1,15 @@
 import { ScheduleType } from "@/enums/schedule-type.enum"
 import { z } from "zod/v3"
 
+export const existingImageRefSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  name: z.string(),
+  size: z.number(),
+})
+
+export type ExistingImageRef = z.infer<typeof existingImageRefSchema>
+
 export const ticketSchema = z.object({
   name: z.string().min(1, "Ticket name is required"),
   price: z.string().min(1, "Price is required"),
@@ -40,7 +49,24 @@ export const eventDateSchema = z.object({
 export const eventFormSchema = z
   .object({
     name: z.string().min(1, "Event name is required"),
-    image: z.string().min(1, "Event image URL is required").url("Invalid URL"),
+    image: z
+      .array(z.union([z.instanceof(File), existingImageRefSchema]))
+      .min(1, "Event image is required")
+      .max(1, "Only one image is allowed")
+      .refine((items) => {
+        if (!items || items.length === 0) return true
+        return items
+          .filter((i) => i instanceof File)
+          .every((file) => file.size <= 5 * 1024 * 1024)
+      }, "Image size must be less than 5MB")
+      .refine((items) => {
+        if (!items || items.length === 0) return true
+        return items
+          .filter((i) => i instanceof File)
+          .every((file) =>
+            ["image/jpeg", "image/png", "image/webp"].includes(file.type)
+          )
+      }, "Only JPEG, PNG, and WebP images are allowed"),
     eventType: z.string().min(1, "Event type is required"),
     scheduleType: z.string().min(1, "Schedule type is required"),
     languages: z.string().optional(),

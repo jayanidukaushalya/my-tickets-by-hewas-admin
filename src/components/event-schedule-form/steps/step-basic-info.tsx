@@ -1,3 +1,4 @@
+import { FileUploader } from "@/components/file-uploader"
 import {
   Field,
   FieldContent,
@@ -57,20 +58,25 @@ export function StepBasicInfo() {
           </FieldContent>
         </Field>
 
-        {/* Event Image URL */}
+        {/* Event Image */}
         <Field orientation="vertical">
           <FieldLabel
             htmlFor="event-image"
             className="text-xs font-semibold tracking-tighter uppercase opacity-70"
           >
-            Event Image URL
+            Event Image
           </FieldLabel>
           <FieldContent>
-            <Input
-              id="event-image"
-              placeholder="https://example.com/event-banner.jpg"
-              className="h-10 border-border/30 bg-background/20 transition-colors focus:border-primary/50"
-              {...register("image")}
+            <Controller
+              name="image"
+              control={control}
+              render={({ field }) => (
+                <FileUploader
+                  value={field.value}
+                  onChange={field.onChange}
+                  maxFiles={1}
+                />
+              )}
             />
             <FieldError className="mt-1 text-xs font-medium">
               {errors.image?.message}

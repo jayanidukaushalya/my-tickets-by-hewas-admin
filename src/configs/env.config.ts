@@ -21,5 +21,14 @@ export const FIREBASE_PRIVATE_KEY = (
 )?.replace(/\\n/g, "\n")
 
 export const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY as string
-
 export const GOOGLE_MAPS_MAP_ID = process.env.GOOGLE_MAPS_MAP_ID as string
+
+export const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID as string
+export const CLOUDFLARE_R2_ACCESS_KEY_ID = process.env
+  .CLOUDFLARE_R2_ACCESS_KEY_ID as string
+export const CLOUDFLARE_R2_SECRET_ACCESS_KEY = process.env
+  .CLOUDFLARE_R2_SECRET_ACCESS_KEY as string
+export const CLOUDFLARE_R2_BUCKET_NAME = process.env
+  .CLOUDFLARE_R2_BUCKET_NAME as string
+export const CLOUDFLARE_R2_PUBLIC_URL = process.env
+  .CLOUDFLARE_R2_PUBLIC_URL as string

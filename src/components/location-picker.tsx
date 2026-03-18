@@ -184,7 +184,10 @@ export function LocationPicker({
           <Autocomplete
             onLoad={handleAutocompleteLoad}
             onPlaceChanged={handlePlaceChanged}
-            options={{ types: ["establishment", "geocode"] }}
+            options={{
+              types: ["establishment", "geocode"],
+              componentRestrictions: { country: "lk" },
+            }}
           >
             <div className="relative flex items-center">
               <HugeiconsIcon
