@@ -1,14 +1,23 @@
 import { DashboardHeader } from "@/components/dashboard-header"
+import { LocationPicker } from "@/components/location-picker"
 import { Button } from "@/components/ui/button"
+import { GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_MAP_ID } from "@/configs/env.config"
 import { Add01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/_dashboard/events/")({
   component: EventsComponent,
+  loader: () => {
+    return {
+      googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+      googleMapsMapId: GOOGLE_MAPS_MAP_ID,
+    }
+  },
 })
 
 function EventsComponent() {
+  const { googleMapsApiKey, googleMapsMapId } = Route.useLoaderData()
   return (
     <>
       <DashboardHeader />
@@ -35,9 +44,14 @@ function EventsComponent() {
           </Button>
         </div>
 
-        <div className="rounded-3xl border border-border/40 bg-card/30 p-8 text-center text-muted-foreground backdrop-blur-2xl">
+        {/* <div className="rounded-3xl border border-border/40 bg-card/30 p-8 text-center text-muted-foreground backdrop-blur-2xl">
           <p>Events list will be displayed here.</p>
-        </div>
+        </div> */}
+
+        <LocationPicker
+          googleMapsApiKey={googleMapsApiKey}
+          googleMapsMapId={googleMapsMapId}
+        />
       </main>
     </>
   )

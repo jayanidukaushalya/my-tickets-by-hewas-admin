@@ -7,11 +7,20 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { format } from "date-fns"
 import { EVENT_TYPE_OPTIONS, SCHEDULE_TYPE_OPTIONS } from "../constants"
 import { ReviewRow, ReviewSection } from "../review-widgets"
+import { LocationMap } from "@/components/location-map"
 
 import { useFormContext } from "react-hook-form"
 import type { EventFormValues } from "../schema"
 
-export function StepReview() {
+export interface StepReviewProps {
+  googleMapsApiKey: string
+  googleMapsMapId: string
+}
+
+export function StepReview({
+  googleMapsApiKey,
+  googleMapsMapId,
+}: StepReviewProps) {
   const { watch } = useFormContext<EventFormValues>()
   const values = watch()
 
@@ -44,6 +53,16 @@ export function StepReview() {
         <ReviewSection title="Location">
           <ReviewRow label="Venue" value={values.venue} />
           <ReviewRow label="Address" value={values.address || "—"} />
+
+          {values.lat && values.lng && (
+            <LocationMap
+              className="mt-4"
+              lat={values.lat}
+              lng={values.lng}
+              googleMapsApiKey={googleMapsApiKey}
+              googleMapsMapId={googleMapsMapId}
+            />
+          )}
         </ReviewSection>
 
         {/* Schedule & Tickets */}
@@ -71,7 +90,9 @@ export function StepReview() {
                       className="size-3"
                       strokeWidth={2}
                     />
-                    {ts.startTime} — {ts.endTime}
+                    {ts.endTime
+                      ? `${ts.startTime || "--:--"} — ${ts.endTime}`
+                      : `${ts.startTime || "--:--"} Onwards`}
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {ts.tickets.map((ticket, tIdx) => (

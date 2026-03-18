@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ScheduleType } from "@/enums/schedule-type.enum"
+import { GOOGLE_MAPS_DEFAULT_CENTER } from "@/integrations/google-maps"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowLeft01Icon,
@@ -19,7 +20,15 @@ import { StepReview } from "./steps/step-review"
 import { StepSchedule } from "./steps/step-schedule"
 import { StepTickets } from "./steps/step-tickets"
 
-export function EventScheduleForm() {
+interface EventScheduleFormProps {
+  googleMapsApiKey: string
+  googleMapsMapId: string
+}
+
+export function EventScheduleForm({
+  googleMapsApiKey,
+  googleMapsMapId,
+}: EventScheduleFormProps) {
   const [currentStep, setCurrentStep] = useState(0)
 
   const form = useForm<EventFormValues>({
@@ -33,6 +42,8 @@ export function EventScheduleForm() {
       description: "",
       venue: "",
       address: "",
+      lat: GOOGLE_MAPS_DEFAULT_CENTER.lat,
+      lng: GOOGLE_MAPS_DEFAULT_CENTER.lng,
       eventDates: [
         {
           date: "",
@@ -160,9 +171,19 @@ export function EventScheduleForm() {
           <CardContent>
             {currentStep === 0 && <StepBasicInfo />}
             {currentStep === 1 && <StepSchedule />}
-            {currentStep === 2 && <StepLocation />}
+            {currentStep === 2 && (
+              <StepLocation
+                googleMapsApiKey={googleMapsApiKey}
+                googleMapsMapId={googleMapsMapId}
+              />
+            )}
             {currentStep === 3 && <StepTickets />}
-            {currentStep === 4 && <StepReview />}
+            {currentStep === 4 && (
+              <StepReview
+                googleMapsApiKey={googleMapsApiKey}
+                googleMapsMapId={googleMapsMapId}
+              />
+            )}
           </CardContent>
         </Card>
 

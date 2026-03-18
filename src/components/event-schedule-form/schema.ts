@@ -10,7 +10,24 @@ export const ticketSchema = z.object({
 export const timeSlotSchema = z.object({
   startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().optional(),
-  tickets: z.array(ticketSchema).min(1, "At least one ticket type is required"),
+  tickets: z
+    .array(ticketSchema)
+    .min(1, "At least one ticket type is required")
+    .superRefine((tickets, ctx) => {
+      const names = new Set<string>()
+      tickets.forEach((ticket, idx) => {
+        const nameKey = ticket.name.trim().toLowerCase()
+        if (names.has(nameKey)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Ticket names must be unique",
+            path: [idx, "name"],
+          })
+        } else if (nameKey) {
+          names.add(nameKey)
+        }
+      })
+    }),
 })
 
 export const eventDateSchema = z.object({
@@ -23,13 +40,15 @@ export const eventDateSchema = z.object({
 export const eventFormSchema = z
   .object({
     name: z.string().min(1, "Event name is required"),
-    image: z.string().min(1, "Event image URL is required"),
+    image: z.string().min(1, "Event image URL is required").url("Invalid URL"),
     eventType: z.string().min(1, "Event type is required"),
     scheduleType: z.string().min(1, "Schedule type is required"),
     languages: z.string().optional(),
     description: z.string().optional(),
     venue: z.string().min(1, "Venue is required"),
     address: z.string().optional(),
+    lat: z.number().optional(),
+    lng: z.number().optional(),
     eventDates: z
       .array(eventDateSchema)
       .min(1, "At least one event date is required"),
@@ -47,15 +66,6 @@ export const eventFormSchema = z
             message: "Multi-time events require at least 2 time slots",
           })
         }
-        ed.timeSlots.forEach((ts, tsIdx) => {
-          if (!ts.endTime) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ["eventDates", idx, "timeSlots", tsIdx, "endTime"],
-              message: "End time is required for multi-time events",
-            })
-          }
-        })
       })
     }
 
@@ -81,15 +91,6 @@ export const eventFormSchema = z
             message: "Multi-day events require at least 2 time slots per date",
           })
         }
-        ed.timeSlots.forEach((ts, tsIdx) => {
-          if (!ts.endTime) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ["eventDates", idx, "timeSlots", tsIdx, "endTime"],
-              message: "End time is required for multi-day events",
-            })
-          }
-        })
       })
     }
   })

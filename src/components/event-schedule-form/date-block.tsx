@@ -42,6 +42,7 @@ export function DateBlock({
     register,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext<EventFormValues>()
 
@@ -220,7 +221,7 @@ export function DateBlock({
 
                   <div className="flex min-w-[140px] flex-1 flex-col gap-1">
                     <label className="text-[10px] font-semibold tracking-wider uppercase opacity-50">
-                      End Time {isOneTime && "(Optional)"}
+                      End Time (Optional)
                     </label>
                     <InputGroup className="h-9 border-border/30 bg-background/20 transition-colors focus-within:border-primary/50">
                       <InputGroupInput
@@ -231,10 +232,31 @@ export function DateBlock({
                           `eventDates.${dateIndex}.timeSlots.${slotIndex}.endTime`
                         )}
                       />
-                      <InputGroupAddon align="inline-end">
+                      <InputGroupAddon
+                        align="inline-end"
+                        className="gap-1 pr-3.5"
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          type="button"
+                          onClick={() =>
+                            setValue(
+                              `eventDates.${dateIndex}.timeSlots.${slotIndex}.endTime`,
+                              ""
+                            )
+                          }
+                          aria-label="Clear end time"
+                        >
+                          <HugeiconsIcon
+                            icon={Cancel01Icon}
+                            className="size-3 text-muted-foreground/70"
+                            strokeWidth={2}
+                          />
+                        </Button>
                         <HugeiconsIcon
                           icon={Clock01Icon}
-                          className="text-muted-foreground"
+                          className="pointer-events-none size-4 shrink-0 text-muted-foreground"
                           strokeWidth={2}
                         />
                       </InputGroupAddon>

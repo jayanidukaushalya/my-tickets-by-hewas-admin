@@ -1,3 +1,4 @@
+import { LocationPicker } from "@/components/location-picker"
 import {
   Field,
   FieldContent,
@@ -7,14 +8,23 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Location01Icon } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { useFormContext } from "react-hook-form"
+import { Controller, useFormContext } from "react-hook-form"
 import type { EventFormValues } from "../schema"
 
-export function StepLocation() {
+interface StepLocationProps {
+  googleMapsApiKey: string
+  googleMapsMapId: string
+}
+
+export function StepLocation({
+  googleMapsApiKey,
+  googleMapsMapId,
+}: StepLocationProps) {
   const {
     register,
+    control,
+    setValue,
+    getValues,
     formState: { errors },
   } = useFormContext<EventFormValues>()
 
@@ -28,6 +38,7 @@ export function StepLocation() {
       </div>
 
       <FieldGroup className="gap-5">
+        {/* Venue Name */}
         <Field orientation="vertical">
           <FieldLabel
             htmlFor="venue"
@@ -48,6 +59,7 @@ export function StepLocation() {
           </FieldContent>
         </Field>
 
+        {/* Address */}
         <Field orientation="vertical">
           <FieldLabel
             htmlFor="address"
@@ -65,24 +77,37 @@ export function StepLocation() {
           </FieldContent>
         </Field>
 
-        {/* Google Maps Placeholder */}
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold tracking-tighter uppercase opacity-70">
+        {/* Google Maps picker */}
+        <Field orientation="vertical">
+          <FieldLabel className="text-xs font-semibold tracking-tighter uppercase opacity-70">
             Pin Location on Map
-          </span>
-          <div className="flex h-48 items-center justify-center rounded-xl border-2 border-dashed border-border/30 bg-muted/10">
-            <div className="flex flex-col items-center gap-2 text-muted-foreground/50">
-              <HugeiconsIcon
-                icon={Location01Icon}
-                className="size-8"
-                strokeWidth={1.5}
-              />
-              <span className="text-xs font-medium">
-                Google Maps integration coming soon
-              </span>
-            </div>
-          </div>
-        </div>
+          </FieldLabel>
+          <FieldContent>
+            <Controller
+              name="lat"
+              control={control}
+              render={() => (
+                <LocationPicker
+                  value={undefined}
+                  googleMapsApiKey={googleMapsApiKey}
+                  googleMapsMapId={googleMapsMapId}
+                  onChange={(loc) => {
+                    setValue("lat", loc.lat)
+                    setValue("lng", loc.lng)
+
+                    if (!getValues("address") && loc.address) {
+                      setValue("address", loc.address)
+                    }
+
+                    if (!getValues("venue") && loc.name) {
+                      setValue("venue", loc.name ?? "")
+                    }
+                  }}
+                />
+              )}
+            />
+          </FieldContent>
+        </Field>
       </FieldGroup>
     </div>
   )

@@ -60,7 +60,9 @@ export function SlotTickets({
             {scheduleType !== ScheduleType.ONE_TIME &&
               `Slot ${slotIndex + 1}: `}
             <span className="text-foreground">
-              {startTime || "--:--"} — {endTime || "--:--"}
+              {endTime
+                ? `${startTime || "--:--"} — ${endTime}`
+                : `${startTime || "--:--"} Onwards`}
             </span>
           </span>
         </div>
