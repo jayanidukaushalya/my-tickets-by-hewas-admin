@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as DashboardIndexRouteImport } from './routes/_dashboard.index'
+import { Route as ApiEventsIndexRouteImport } from './routes/api/events/index'
 import { Route as DashboardEventsIndexRouteImport } from './routes/_dashboard.events.index'
+import { Route as ApiEventsEventIdRouteImport } from './routes/api/events/$eventId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as DashboardEventsScheduleRouteImport } from './routes/_dashboard.events.schedule'
 import { Route as DashboardEventsEventIdRouteImport } from './routes/_dashboard.events.$eventId'
@@ -31,10 +33,20 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ApiEventsIndexRoute = ApiEventsIndexRouteImport.update({
+  id: '/api/events/',
+  path: '/api/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardEventsIndexRoute = DashboardEventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const ApiEventsEventIdRoute = ApiEventsEventIdRouteImport.update({
+  id: '/api/events/$eventId',
+  path: '/api/events/$eventId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -58,7 +70,9 @@ export interface FileRoutesByFullPath {
   '/events/$eventId': typeof DashboardEventsEventIdRoute
   '/events/schedule': typeof DashboardEventsScheduleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/events/$eventId': typeof ApiEventsEventIdRoute
   '/events/': typeof DashboardEventsIndexRoute
+  '/api/events/': typeof ApiEventsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -66,7 +80,9 @@ export interface FileRoutesByTo {
   '/events/$eventId': typeof DashboardEventsEventIdRoute
   '/events/schedule': typeof DashboardEventsScheduleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/events/$eventId': typeof ApiEventsEventIdRoute
   '/events': typeof DashboardEventsIndexRoute
+  '/api/events': typeof ApiEventsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -76,7 +92,9 @@ export interface FileRoutesById {
   '/_dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
   '/_dashboard/events/schedule': typeof DashboardEventsScheduleRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/events/$eventId': typeof ApiEventsEventIdRoute
   '/_dashboard/events/': typeof DashboardEventsIndexRoute
+  '/api/events/': typeof ApiEventsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,7 +104,9 @@ export interface FileRouteTypes {
     | '/events/$eventId'
     | '/events/schedule'
     | '/api/auth/$'
+    | '/api/events/$eventId'
     | '/events/'
+    | '/api/events/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -94,7 +114,9 @@ export interface FileRouteTypes {
     | '/events/$eventId'
     | '/events/schedule'
     | '/api/auth/$'
+    | '/api/events/$eventId'
     | '/events'
+    | '/api/events'
   id:
     | '__root__'
     | '/_dashboard'
@@ -103,13 +125,17 @@ export interface FileRouteTypes {
     | '/_dashboard/events/$eventId'
     | '/_dashboard/events/schedule'
     | '/api/auth/$'
+    | '/api/events/$eventId'
     | '/_dashboard/events/'
+    | '/api/events/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiEventsEventIdRoute: typeof ApiEventsEventIdRoute
+  ApiEventsIndexRoute: typeof ApiEventsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -135,12 +161,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/api/events/': {
+      id: '/api/events/'
+      path: '/api/events'
+      fullPath: '/api/events/'
+      preLoaderRoute: typeof ApiEventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_dashboard/events/': {
       id: '/_dashboard/events/'
       path: '/events'
       fullPath: '/events/'
       preLoaderRoute: typeof DashboardEventsIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/api/events/$eventId': {
+      id: '/api/events/$eventId'
+      path: '/api/events/$eventId'
+      fullPath: '/api/events/$eventId'
+      preLoaderRoute: typeof ApiEventsEventIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -188,6 +228,8 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiEventsEventIdRoute: ApiEventsEventIdRoute,
+  ApiEventsIndexRoute: ApiEventsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
