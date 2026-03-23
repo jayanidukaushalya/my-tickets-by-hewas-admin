@@ -24,7 +24,7 @@ import type { EventFormValues } from "../schema"
     <div className="animate-in space-y-6 duration-500 fade-in slide-in-from-right-4">
       <div className="space-y-1">
         <h2 className="text-xl font-bold tracking-tight">Event Location</h2>
-        <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase opacity-60">
+        <p className="text-sm font-medium tracking-wide text-muted-foreground opacity-60">
           Where will your event take place?
         </p>
       </div>

@@ -17,6 +17,40 @@ type EventData = NonNullable<
 export function EventCard({ event }: { event: EventData }) {
   const mainDate = event.eventDates?.[0]?.date
   const venue = event.location?.venue ?? "TBD"
+  const totalQty =
+    event.eventDates?.reduce(
+      (acc, dt) =>
+        acc +
+        dt.timeSlots.reduce(
+          (accTs, ts) =>
+            accTs + ts.tickets.reduce((accT, t) => accT + t.qty, 0),
+          0
+        ),
+      0
+    ) || 0
+
+  const totalSold =
+    event.eventDates?.reduce(
+      (acc, dt) =>
+        acc +
+        dt.timeSlots.reduce(
+          (accTs, ts) =>
+            accTs +
+            ts.tickets.reduce(
+              (accT, t) =>
+                accT +
+                t.purchases.reduce(
+                  (accP, p: { qty: number }) => accP + p.qty,
+                  0
+                ),
+              0
+            ),
+          0
+        ),
+      0
+    ) || 0
+
+  const isSoldOut = totalQty > 0 && totalSold >= totalQty
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-card/40 shadow-sm backdrop-blur-xl transition-all hover:-translate-y-1 hover:bg-card/60 hover:shadow-md">
@@ -29,6 +63,11 @@ export function EventCard({ event }: { event: EventData }) {
         <div className="absolute top-3 left-3 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase backdrop-blur-md">
           {formatEnum(event.eventType)}
         </div>
+        {isSoldOut && (
+          <div className="absolute right-3 top-3 rounded-full bg-destructive/90 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase text-destructive-foreground shadow-sm backdrop-blur-md">
+            Sold Out
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col justify-between space-y-4 p-5">

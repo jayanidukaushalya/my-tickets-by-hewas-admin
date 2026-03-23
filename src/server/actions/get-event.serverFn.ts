@@ -14,7 +14,15 @@ export const getEventFn = createServerFn({ method: "GET" })
           with: {
             timeSlots: {
               with: {
-                tickets: true,
+                tickets: {
+                  with: {
+                    purchases: {
+                      columns: {
+                        qty: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
