@@ -135,7 +135,9 @@ export function DateBlock({
                       onSelect={(date) =>
                         field.onChange(date?.toISOString() || "")
                       }
-                      initialFocus
+                      disabled={(date) =>
+                        date < new Date(new Date().setHours(0, 0, 0, 0))
+                      }
                     />
                   </PopoverContent>
                 </Popover>

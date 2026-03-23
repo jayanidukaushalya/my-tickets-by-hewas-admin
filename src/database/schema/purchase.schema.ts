@@ -7,11 +7,14 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core"
+import { ulid } from "ulid"
 import { customer } from "./customer.schema"
 import { ticket } from "./ticket.schema"
 
 export const purchase = pgTable("purchase", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => ulid()),
   customerId: text("customer_id")
     .notNull()
     .references(() => customer.id, { onDelete: "cascade" }),

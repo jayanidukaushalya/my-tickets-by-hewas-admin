@@ -1,10 +1,13 @@
 import { relations } from "drizzle-orm"
 import { integer, numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core"
-import { timeSlot } from "./time-slot.schema"
+import { ulid } from "ulid"
 import { purchase } from "./purchase.schema"
+import { timeSlot } from "./time-slot.schema"
 
 export const ticket = pgTable("ticket", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => ulid()),
   timeSlotId: text("time_slot_id")
     .notNull()
     .references(() => timeSlot.id, { onDelete: "cascade" }),

@@ -2,6 +2,7 @@ import { EventType } from "@/enums/event-type.enum"
 import { ScheduleType } from "@/enums/schedule-type.enum"
 import { relations } from "drizzle-orm"
 import { pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { ulid } from "ulid"
 import { eventDate } from "./event-date.schema"
 import { location } from "./location.schema"
 
@@ -9,7 +10,9 @@ export const eventTypeEnum = pgEnum("event_type", EventType)
 export const scheduleTypeEnum = pgEnum("schedule_type", ScheduleType)
 
 export const event = pgTable("event", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => ulid()),
   name: text("name").notNull(),
   image: text("image").notNull(),
   eventType: eventTypeEnum("event_type").notNull(),
@@ -23,7 +26,7 @@ export const event = pgTable("event", {
     .notNull(),
 })
 
-export const eventRelations = relations(event, ({ many }) => ({
-  locations: many(location),
+export const eventRelations = relations(event, ({ many, one }) => ({
+  location: one(location),
   eventDates: many(eventDate),
 }))

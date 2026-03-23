@@ -106,18 +106,6 @@ export const eventFormSchema = z
           message: "Multi-day events require at least 2 dates",
         })
       }
-      data.eventDates.forEach((ed, idx) => {
-        if (ed.timeSlots.length < 2) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.too_small,
-            minimum: 2,
-            type: "array",
-            inclusive: true,
-            path: ["eventDates", idx, "timeSlots"],
-            message: "Multi-day events require at least 2 time slots per date",
-          })
-        }
-      })
     }
   })
 

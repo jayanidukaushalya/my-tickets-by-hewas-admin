@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ScheduleType } from "@/enums/schedule-type.enum"
 import { GOOGLE_MAPS_DEFAULT_CENTER } from "@/integrations/google-maps"
+import { createEventAction } from "@/server/actions/create-event.serverFn"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowLeft01Icon,
@@ -9,8 +10,14 @@ import {
   CheckmarkCircle02Icon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { useCallback, useState } from "react"
+import { useNavigate } from "@tanstack/react-router"
+import {
+  useCallback,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react"
 import { FormProvider, useForm, type FieldPath } from "react-hook-form"
+import { toast } from "sonner"
 import { STEPS } from "./constants"
 import { eventFormSchema, type EventFormValues } from "./schema"
 import { StepIndicator } from "./step-indicator"
@@ -20,16 +27,9 @@ import { StepReview } from "./steps/step-review"
 import { StepSchedule } from "./steps/step-schedule"
 import { StepTickets } from "./steps/step-tickets"
 
-interface EventScheduleFormProps {
-  googleMapsApiKey: string
-  googleMapsMapId: string
-}
-
-export function EventScheduleForm({
-  googleMapsApiKey,
-  googleMapsMapId,
-}: EventScheduleFormProps) {
+export function EventScheduleForm() {
   const [currentStep, setCurrentStep] = useState(0)
+  const lastStepIndex = STEPS.length - 1
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -57,7 +57,6 @@ export function EventScheduleForm({
         },
       ],
     },
-    mode: "onBlur",
   })
 
   const { handleSubmit, watch, trigger } = form
@@ -101,13 +100,6 @@ export function EventScheduleForm({
               await trigger("eventDates")
               return false
             }
-            const hasMinSlots = eventDates.every(
-              (ed) => ed.timeSlots.length >= 2
-            )
-            if (!hasMinSlots) {
-              await trigger("eventDates")
-              return false
-            }
           }
 
           return true
@@ -148,14 +140,63 @@ export function EventScheduleForm({
     [currentStep, validateStep]
   )
 
-  const onSubmit = (data: EventFormValues) => {
-    console.log("Event form data:", data)
-    // Server integration to be done later
+  const navigate = useNavigate()
+
+  const onSubmit = async (data: EventFormValues) => {
+    if (currentStep < lastStepIndex) return
+
+    try {
+      const formData = new FormData()
+      formData.append("payload", JSON.stringify(data))
+      if (data.image?.[0] instanceof File) {
+        formData.append("image", data.image[0])
+      }
+
+      await createEventAction({ data: formData })
+
+      toast.success("Event scheduled successfully!")
+      navigate({ to: "/events" })
+    } catch (error) {
+      console.error("Failed to schedule event:", error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to schedule event. Please try again."
+      )
+    }
   }
+
+  console.log(form.formState.errors)
+
+  const handleFormKeyDown = useCallback(
+    (e: ReactKeyboardEvent<HTMLFormElement>) => {
+      // Avoid accidentally submitting the form when pressing Enter.
+      // This prevents the final step (Review) from auto-executing
+      // when Enter is pressed anywhere other than the submit button.
+      if (e.key !== "Enter") return
+
+      const target = e.target as HTMLElement | null
+      const tag = target?.tagName?.toUpperCase()
+
+      // Allow natural behavior for textareas (newlines)
+      // and buttons (explicit selection/submit)
+      if (tag === "TEXTAREA" || tag === "BUTTON") {
+        return
+      }
+
+      // Prevent default form submission elsewhere
+      e.preventDefault()
+    },
+    []
+  )
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        onKeyDown={handleFormKeyDown}
+        className="space-y-8"
+      >
         {/* Step Indicator */}
         <Card className="overflow-hidden border-border/40 bg-card/30 shadow-lg backdrop-blur-2xl">
           <CardContent className="py-2">
@@ -171,19 +212,9 @@ export function EventScheduleForm({
           <CardContent>
             {currentStep === 0 && <StepBasicInfo />}
             {currentStep === 1 && <StepSchedule />}
-            {currentStep === 2 && (
-              <StepLocation
-                googleMapsApiKey={googleMapsApiKey}
-                googleMapsMapId={googleMapsMapId}
-              />
-            )}
+            {currentStep === 2 && <StepLocation />}
             {currentStep === 3 && <StepTickets />}
-            {currentStep === 4 && (
-              <StepReview
-                googleMapsApiKey={googleMapsApiKey}
-                googleMapsMapId={googleMapsMapId}
-              />
-            )}
+            {currentStep === 4 && <StepReview />}
           </CardContent>
         </Card>
 
@@ -207,6 +238,7 @@ export function EventScheduleForm({
 
           {currentStep < STEPS.length - 1 ? (
             <Button
+              key="next-btn"
               type="button"
               size="lg"
               onClick={handleNext}
@@ -220,13 +252,18 @@ export function EventScheduleForm({
               />
             </Button>
           ) : (
-            <Button type="submit" size="lg">
+            <Button
+              key="submit-btn"
+              type="submit"
+              size="lg"
+              disabled={form.formState.isSubmitting}
+            >
               <HugeiconsIcon
                 icon={CheckmarkCircle02Icon}
                 className="size-4"
                 strokeWidth={2}
               />
-              Create Event
+              {form.formState.isSubmitting ? "Creating..." : "Create Event"}
             </Button>
           )}
         </div>

@@ -17,3 +17,22 @@ export const shortenFileName = (fileName: string, maxLength: number = 30): strin
   }
   return fileName.substring(0, maxLength - 3) + "..."
 }
+
+export function formatEnum(val: string) {
+  return val
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+export function formatCurrency(amount: number | string): string {
+  const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount
+  if (isNaN(numericAmount)) return "LKR 0.00"
+
+  return new Intl.NumberFormat("en-LK", {
+    style: "currency",
+    currency: "LKR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(numericAmount)
+}

@@ -1,10 +1,13 @@
 import { relations } from "drizzle-orm"
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { ulid } from "ulid"
 import { event } from "./event.schema"
 import { timeSlot } from "./time-slot.schema"
 
 export const eventDate = pgTable("event_date", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => ulid()),
   eventId: text("event_id")
     .notNull()
     .references(() => event.id, { onDelete: "cascade" }),

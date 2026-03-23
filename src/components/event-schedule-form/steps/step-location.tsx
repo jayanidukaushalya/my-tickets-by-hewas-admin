@@ -11,15 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Controller, useFormContext } from "react-hook-form"
 import type { EventFormValues } from "../schema"
 
-interface StepLocationProps {
-  googleMapsApiKey: string
-  googleMapsMapId: string
-}
-
-export function StepLocation({
-  googleMapsApiKey,
-  googleMapsMapId,
-}: StepLocationProps) {
+  export function StepLocation() {
   const {
     register,
     control,
@@ -89,8 +81,6 @@ export function StepLocation({
               render={() => (
                 <LocationPicker
                   value={undefined}
-                  googleMapsApiKey={googleMapsApiKey}
-                  googleMapsMapId={googleMapsMapId}
                   onChange={(loc) => {
                     setValue("lat", loc.lat)
                     setValue("lng", loc.lng)

@@ -1,16 +1,11 @@
+import { GOOGLE_MAPS_MAP_ID } from "@/configs/env.config"
 import {
   GOOGLE_MAPS_DEFAULT_CENTER,
   GOOGLE_MAPS_DEFAULT_ZOOM,
-  GOOGLE_MAPS_LIBRARIES,
 } from "@/integrations/google-maps"
 import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  Autocomplete,
-  GoogleMap,
-  Marker,
-  useJsApiLoader,
-} from "@react-google-maps/api"
+import { Autocomplete, GoogleMap, Marker } from "@react-google-maps/api"
 import type React from "react"
 import { useCallback, useRef, useState } from "react"
 
@@ -26,8 +21,6 @@ interface LocationPickerProps {
   value?: PickedLocation | null
   onChange?: (location: PickedLocation) => void
   className?: string
-  googleMapsApiKey: string
-  googleMapsMapId: string
 }
 
 const MAP_CONTAINER_STYLE: React.CSSProperties = {
@@ -41,14 +34,7 @@ export function LocationPicker({
   value,
   onChange,
   className,
-  googleMapsApiKey,
-  googleMapsMapId,
 }: LocationPickerProps) {
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey,
-    libraries: GOOGLE_MAPS_LIBRARIES,
-  })
-
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -131,23 +117,6 @@ export function LocationPicker({
     if (inputRef.current) inputRef.current.value = ""
   }, [])
 
-  if (loadError) {
-    return (
-      <div className="flex h-[360px] items-center justify-center rounded-xl border border-destructive/30 bg-destructive/5 text-xs text-destructive">
-        Failed to load Google Maps. Check your API key.
-      </div>
-    )
-  }
-
-  if (!isLoaded) {
-    return (
-      <div
-        className="h-[360px] animate-pulse rounded-xl bg-muted/20"
-        aria-label="Loading map…"
-      />
-    )
-  }
-
   return (
     <div className={className}>
       {/* Map container with search bar floating inside like Google Maps */}
@@ -166,7 +135,7 @@ export function LocationPicker({
             mapTypeControl: false,
             fullscreenControl: false,
             clickableIcons: false,
-            mapId: googleMapsMapId,
+            mapId: GOOGLE_MAPS_MAP_ID,
             gestureHandling: "cooperative",
           }}
         >

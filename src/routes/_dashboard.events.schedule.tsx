@@ -1,21 +1,18 @@
 import { DashboardHeader } from "@/components/dashboard-header"
 import { EventScheduleForm } from "@/components/event-schedule-form"
-import { GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_MAP_ID } from "@/configs/env.config"
+import { GoogleMapsProvider } from "@/providers/google-maps-provider"
 import { createFileRoute } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/_dashboard/events/schedule")({
   component: EventScheduleComponent,
-  loader: () => ({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    googleMapsMapId: GOOGLE_MAPS_MAP_ID,
-  }),
+  
 })
 
 function EventScheduleComponent() {
-  const { googleMapsApiKey, googleMapsMapId } = Route.useLoaderData()
+
   return (
     <>
-      <DashboardHeader
+    <DashboardHeader
         breadcrumbs={[
           { label: "Dashboard", href: "/" },
           { label: "Events", href: "/events" },
@@ -31,12 +28,11 @@ function EventScheduleComponent() {
             Create and configure a new ticketed event
           </p>
         </div>
+ <GoogleMapsProvider>
+              <EventScheduleForm />
 
-        <EventScheduleForm
-          googleMapsApiKey={googleMapsApiKey}
-          googleMapsMapId={googleMapsMapId}
-        />
-      </main>
-    </>
+    </GoogleMapsProvider>
+      </main></>
+   
   )
 }

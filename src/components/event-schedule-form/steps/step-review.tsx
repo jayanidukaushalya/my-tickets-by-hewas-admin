@@ -1,3 +1,4 @@
+import { LocationMap } from "@/components/location-map"
 import {
   Calendar03Icon,
   Clock01Icon,
@@ -5,22 +6,16 @@ import {
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { format } from "date-fns"
+import { formatCurrency } from "@/lib/utils"
 import { EVENT_TYPE_OPTIONS, SCHEDULE_TYPE_OPTIONS } from "../constants"
 import { ReviewRow, ReviewSection } from "../review-widgets"
-import { LocationMap } from "@/components/location-map"
 
 import { useFormContext } from "react-hook-form"
 import type { EventFormValues } from "../schema"
 
-export interface StepReviewProps {
-  googleMapsApiKey: string
-  googleMapsMapId: string
-}
 
-export function StepReview({
-  googleMapsApiKey,
-  googleMapsMapId,
-}: StepReviewProps) {
+
+export function StepReview() {
   const { watch } = useFormContext<EventFormValues>()
   const values = watch()
 
@@ -59,8 +54,6 @@ export function StepReview({
               className="mt-4"
               lat={values.lat}
               lng={values.lng}
-              googleMapsApiKey={googleMapsApiKey}
-              googleMapsMapId={googleMapsMapId}
             />
           )}
         </ReviewSection>
@@ -105,7 +98,7 @@ export function StepReview({
                           className="size-2.5"
                           strokeWidth={2}
                         />
-                        {ticket.name}: LKR {ticket.price} × {ticket.qty}
+                        {ticket.name}: {formatCurrency(ticket.price)} × {ticket.qty}
                       </span>
                     ))}
                   </div>
