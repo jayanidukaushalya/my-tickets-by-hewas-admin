@@ -5,7 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const shortenFileName = (fileName: string, maxLength: number = 30): string => {
+export const shortenFileName = (
+  fileName: string,
+  maxLength: number = 30
+): string => {
   if (!fileName || fileName.length <= maxLength) return fileName
   const lastDotIndex = fileName.lastIndexOf(".")
   if (lastDotIndex > 0 && lastDotIndex < fileName.length - 1) {
@@ -35,4 +38,15 @@ export function formatCurrency(amount: number | string): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(numericAmount)
+}
+
+export function getNumberFromParams(
+  searchParams: URLSearchParams,
+  key: string
+) {
+  const value = searchParams.get(key)
+  if (value === null) return undefined
+
+  const num = Number(value)
+  return Number.isNaN(num) ? undefined : num
 }

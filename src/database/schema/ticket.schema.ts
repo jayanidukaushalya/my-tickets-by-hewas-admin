@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm"
 import { integer, numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import { ulid } from "ulid"
+import { purchaseSession } from "./purchase-session.schema"
 import { purchase } from "./purchase.schema"
 import { timeSlot } from "./time-slot.schema"
 
@@ -27,4 +28,5 @@ export const ticketRelations = relations(ticket, ({ one, many }) => ({
     references: [timeSlot.id],
   }),
   purchases: many(purchase),
+  purchaseSessions: many(purchaseSession),
 }))

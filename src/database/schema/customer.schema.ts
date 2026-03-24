@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm"
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import { ulid } from "ulid"
+import { purchaseSession } from "./purchase-session.schema"
 import { purchase } from "./purchase.schema"
 
 export const customer = pgTable("customer", {
@@ -20,4 +21,5 @@ export const customer = pgTable("customer", {
 
 export const customerRelations = relations(customer, ({ many }) => ({
   purchases: many(purchase),
+  purchaseSessions: many(purchaseSession),
 }))
