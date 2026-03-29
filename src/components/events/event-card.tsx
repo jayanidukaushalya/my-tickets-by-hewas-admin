@@ -15,56 +15,63 @@ type EventData = NonNullable<
 >[number]
 
 export function EventCard({ event }: { event: EventData }) {
+  // Safely extract main date
   const mainDate = event.eventDates?.[0]?.date
   const venue = event.location?.venue ?? "TBD"
+  
+  // Calculate total tickets available
   const totalQty =
     event.eventDates?.reduce(
       (acc, dt) =>
         acc +
-        dt.timeSlots.reduce(
+        (dt.timeSlots?.reduce(
           (accTs, ts) =>
-            accTs + ts.tickets.reduce((accT, t) => accT + t.qty, 0),
+            accTs + (ts.tickets?.reduce((accT, t) => accT + (t.qty || 0), 0) || 0),
           0
-        ),
+        ) || 0),
       0
     ) || 0
 
+  // Calculate total tickets sold
   const totalSold =
     event.eventDates?.reduce(
       (acc, dt) =>
         acc +
-        dt.timeSlots.reduce(
+        (dt.timeSlots?.reduce(
           (accTs, ts) =>
             accTs +
-            ts.tickets.reduce(
+            (ts.tickets?.reduce(
               (accT, t) =>
                 accT +
-                t.purchases.reduce(
-                  (accP, p: { qty: number }) => accP + p.qty,
+                (t.purchases?.reduce(
+                  (accP, p: { qty: number }) => accP + (p.qty || 0),
                   0
-                ),
+                ) || 0),
               0
-            ),
+            ) || 0),
           0
-        ),
+        ) || 0),
       0
     ) || 0
 
   const isSoldOut = totalQty > 0 && totalSold >= totalQty
+  
+  // Count total dates
+  const totalDates = event.eventDates?.length || 0
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-3xl border border-border/40 bg-card/40 shadow-sm backdrop-blur-xl transition-all hover:-translate-y-1 hover:bg-card/60 hover:shadow-md">
+    <div className="group flex flex-col overflow-hidden rounded-3xl border border-border/50 bg-card/40 shadow-2xl backdrop-blur-2xl transition-all hover:-translate-y-1 hover:bg-card/60 hover:shadow-xl">
       <div className="relative aspect-video w-full overflow-hidden bg-muted/30">
         <img
           src={event.image || "https://placehold.co/600x400?text=No+Image"}
           alt={event.name}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute top-3 left-3 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase backdrop-blur-md">
+        <div className="absolute top-3 left-3 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase backdrop-blur-md">
           {formatEnum(event.eventType)}
         </div>
         {isSoldOut && (
-          <div className="absolute right-3 top-3 rounded-full bg-destructive/90 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase text-destructive-foreground shadow-sm backdrop-blur-md">
+          <div className="absolute right-3 top-3 rounded-full bg-destructive/90 px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase text-destructive-foreground shadow-sm backdrop-blur-md">
             Sold Out
           </div>
         )}
@@ -79,24 +86,23 @@ export function EventCard({ event }: { event: EventData }) {
             {event.name}
           </h3>
           {event.languages && (
-            <p className="text-xs font-medium text-muted-foreground opacity-80">
+            <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase opacity-70">
               {event.languages}
             </p>
           )}
         </div>
 
-        <div className="space-y-2.5 rounded-xl bg-background/30 p-3">
+        <div className="space-y-2.5 rounded-xl bg-background/20 p-3 backdrop-blur-sm">
           <div className="flex items-start gap-2 text-sm text-foreground/80">
             <HugeiconsIcon
               icon={Calendar03Icon}
               className="mt-0.5 size-3.5 shrink-0 text-primary/70"
             />
-            <span className="line-clamp-1 text-xs font-medium">
+            <span className="line-clamp-1 text-xs font-semibold">
               {mainDate
                 ? format(new Date(mainDate), "MMM do, yyyy")
                 : "No Date"}
-              {event.eventDates.length > 1 &&
-                ` (+${event.eventDates.length - 1} more)`}
+              {totalDates > 1 && ` (+${totalDates - 1} more)`}
             </span>
           </div>
 
@@ -105,7 +111,7 @@ export function EventCard({ event }: { event: EventData }) {
               icon={Location01Icon}
               className="mt-0.5 size-3.5 shrink-0 text-primary/70"
             />
-            <span className="line-clamp-1 text-xs font-medium">{venue}</span>
+            <span className="line-clamp-1 text-xs font-semibold">{venue}</span>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-foreground/80">
@@ -113,7 +119,7 @@ export function EventCard({ event }: { event: EventData }) {
               icon={Ticket01Icon}
               className="size-3.5 shrink-0 text-primary/70"
             />
-            <span className="text-xs font-medium capitalize">
+            <span className="text-xs font-semibold uppercase">
               {formatEnum(event.scheduleType)}
             </span>
           </div>
@@ -121,7 +127,7 @@ export function EventCard({ event }: { event: EventData }) {
 
         <Button
           variant="secondary"
-          className="w-full font-semibold shadow-none"
+          className="h-10 w-full text-xs font-bold tracking-widest uppercase shadow-lg shadow-primary/10 transition-all active:scale-95"
           asChild
         >
           <Link to="/events/$eventId" params={{ eventId: event.id }}>

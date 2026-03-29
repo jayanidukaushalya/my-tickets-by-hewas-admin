@@ -33,3 +33,6 @@ export const CLOUDFLARE_R2_BUCKET_NAME = process.env
   .CLOUDFLARE_R2_BUCKET_NAME as string
 export const CLOUDFLARE_R2_PUBLIC_URL = process.env
   .CLOUDFLARE_R2_PUBLIC_URL as string
+
+export const PAYHERE_MERCHANT_ID = process.env.PAYHERE_MERCHANT_ID
+export const PAYHERE_MERCHANT_SECRET = process.env.PAYHERE_MERCHANT_SECRET

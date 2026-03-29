@@ -91,17 +91,23 @@ function EventsComponent() {
   return (
     <>
       <DashboardHeader />
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="relative flex-1 overflow-y-auto p-6">
+        {/* Background decoration */}
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute top-[10%] left-[15%] h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+          <div className="absolute right-[15%] bottom-[10%] h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />
+        </div>
+
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-bold tracking-tight">
-              Events Management
+            <h1 className="text-4xl font-black tracking-tight uppercase">
+              Events
             </h1>
-            <p className="text-sm font-medium tracking-widest text-muted-foreground uppercase opacity-60">
+            <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase opacity-70">
               Manage and monitor all your ticketed events
             </p>
           </div>
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="h-12 text-xs font-bold tracking-widest uppercase shadow-lg shadow-primary/20 transition-all active:scale-95">
             <Link to="/events/schedule">
               <HugeiconsIcon
                 icon={Add01Icon}

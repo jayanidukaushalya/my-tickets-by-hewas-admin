@@ -59,11 +59,11 @@ export function EventFilters({
       <div className="relative w-full">
         <HugeiconsIcon
           icon={Search01Icon}
-          className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground/70"
         />
         <Input
           placeholder="Search events..."
-          className="h-10 w-full border-border/40 bg-card/50 pl-9 backdrop-blur-xl transition-colors hover:bg-card/60 focus:border-primary/50 dark:bg-card/50 dark:hover:bg-card/60"
+          className="h-10 w-full border-border/30 bg-background/20 pl-9 backdrop-blur-2xl transition-colors hover:bg-card/60 focus:border-primary/50"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
         />
@@ -75,7 +75,7 @@ export function EventFilters({
             <Button
               variant="outline"
               className={cn(
-                "h-10 w-full justify-start border-border/40 bg-card/50 font-normal transition-colors hover:bg-card/60 hover:text-foreground focus:border-primary/50 dark:border-border/40 dark:bg-card/50 dark:hover:bg-card/60",
+                "h-10 w-full justify-start border-border/30 bg-background/20 font-normal backdrop-blur-2xl transition-colors hover:bg-card/60 hover:text-foreground focus:border-primary/50",
                 !selectedRange.from && "text-muted-foreground"
               )}
             >
@@ -145,7 +145,7 @@ export function EventFilters({
             onEventTypeChange(val === "all" ? null : (val as EventType))
           }
         >
-          <SelectTrigger className="h-10 w-full border-border/40 bg-card/50 backdrop-blur-xl transition-colors hover:bg-card/60 focus:border-primary/50 dark:bg-card/50 dark:hover:bg-card/60">
+          <SelectTrigger className="h-10 w-full border-border/30 bg-background/20 backdrop-blur-2xl transition-colors hover:bg-card/60 focus:border-primary/50">
             <SelectValue placeholder="All Event Types" />
           </SelectTrigger>
           <SelectContent>
@@ -166,7 +166,7 @@ export function EventFilters({
             onScheduleTypeChange(val === "all" ? null : (val as ScheduleType))
           }
         >
-          <SelectTrigger className="h-10 w-full border-border/40 bg-card/50 backdrop-blur-xl transition-colors hover:bg-card/60 focus:border-primary/50 dark:bg-card/50 dark:hover:bg-card/60">
+          <SelectTrigger className="h-10 w-full border-border/30 bg-background/20 backdrop-blur-2xl transition-colors hover:bg-card/60 focus:border-primary/50">
             <SelectValue placeholder="All Schedule Types" />
           </SelectTrigger>
           <SelectContent>

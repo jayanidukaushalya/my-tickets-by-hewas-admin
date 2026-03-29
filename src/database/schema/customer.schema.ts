@@ -10,6 +10,7 @@ export const customer = pgTable("customer", {
     .$defaultFn(() => ulid()),
   firstName: text("first_name"),
   lastName: text("last_name"),
+  phone: text("phone"),
   email: text("email").notNull().unique(),
   firebaseUid: text("firebase_uid").unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

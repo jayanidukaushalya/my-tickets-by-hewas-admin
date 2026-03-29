@@ -3,19 +3,30 @@ import { event, eventDate } from "@/database/schema"
 import { EventType } from "@/enums/event-type.enum"
 import { ScheduleType } from "@/enums/schedule-type.enum"
 import { createServerFn } from "@tanstack/react-start"
-import { and, asc, count, desc, eq, exists, gte, ilike, lte } from "drizzle-orm"
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  exists,
+  gte,
+  ilike,
+  inArray,
+  lte,
+} from "drizzle-orm"
 import { z } from "zod"
 
 export const getEventsValidator = z.object({
-  search: z.string().optional(),
-  page: z.number().positive().optional().default(1),
-  limit: z.number().positive().optional().default(8),
-  field: z.string().optional(),
-  order: z.enum(["asc", "desc"]).optional(),
-  eventType: z.enum(EventType).optional(),
-  scheduleType: z.enum(ScheduleType).optional(),
-  dateFrom: z.string().optional(),
-  dateTo: z.string().optional(),
+  search: z.string().optional().nullable(),
+  page: z.number().positive().optional().nullable().default(1),
+  limit: z.number().positive().optional().nullable().default(8),
+  field: z.string().optional().nullable(),
+  order: z.enum(["asc", "desc"]).optional().nullable(),
+  eventType: z.array(z.enum(EventType)).optional().nullable(),
+  scheduleType: z.enum(ScheduleType).optional().nullable(),
+  dateFrom: z.string().optional().nullable(),
+  dateTo: z.string().optional().nullable(),
 })
 
 export const getEventsFn = createServerFn({ method: "GET" })
@@ -27,8 +38,8 @@ export const getEventsFn = createServerFn({ method: "GET" })
       conditions.push(ilike(event.name, `%${data.search}%`))
     }
 
-    if (data?.eventType) {
-      conditions.push(eq(event.eventType, data.eventType))
+    if (data?.eventType && data.eventType.length > 0) {
+      conditions.push(inArray(event.eventType, data.eventType))
     }
 
     if (data?.scheduleType) {

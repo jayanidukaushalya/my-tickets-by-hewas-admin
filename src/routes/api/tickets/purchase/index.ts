@@ -1,10 +1,6 @@
 import { db } from "@/database"
 import { customer, purchase } from "@/database/schema"
-import {
-  apiSuccess,
-  corsPreflightResponse,
-  privateHandler,
-} from "@/server/api"
+import { apiSuccess, corsPreflightResponse, privateHandler } from "@/server/api"
 import { createFileRoute } from "@tanstack/react-router"
 import { desc, eq } from "drizzle-orm"
 
@@ -13,20 +9,16 @@ export const Route = createFileRoute("/api/tickets/purchase/")({
     handlers: {
       OPTIONS: () => corsPreflightResponse(),
 
-      /**
-       * Returns all confirmed purchases for the authenticated user.
-       *
-       * Each purchase includes the full chain of context the mobile client
-       * needs to render a ticket:
-       *   purchase -> ticket -> timeSlot -> eventDate -> event
-       */
       GET: privateHandler(async ({ user }) => {
         const currentCustomer = await db.query.customer.findFirst({
           where: eq(customer.firebaseUid, user.uid),
         })
 
         if (!currentCustomer) {
-          return apiSuccess([])
+          return apiSuccess({
+            results: [],
+            total: 0,
+          })
         }
 
         const purchases = await db.query.purchase.findMany({
@@ -34,34 +26,12 @@ export const Route = createFileRoute("/api/tickets/purchase/")({
           orderBy: [desc(purchase.createdAt)],
           with: {
             ticket: {
-              columns: {
-                id: true,
-                name: true,
-                price: true,
-              },
               with: {
                 timeSlot: {
-                  columns: {
-                    id: true,
-                    startTime: true,
-                    endTime: true,
-                  },
                   with: {
                     eventDate: {
-                      columns: {
-                        id: true,
-                        date: true,
-                      },
                       with: {
-                        event: {
-                          columns: {
-                            id: true,
-                            name: true,
-                            image: true,
-                            eventType: true,
-                            scheduleType: true,
-                          },
-                        },
+                        event: true,
                       },
                     },
                   },
@@ -71,9 +41,31 @@ export const Route = createFileRoute("/api/tickets/purchase/")({
           },
         })
 
-        return apiSuccess(purchases)
+        const formattedPurchases = purchases.map((p) => ({
+          id: p.id,
+          ticketId: p.ticketId,
+          qty: p.qty,
+          price: p.price,
+          isActivated: p.isActivated,
+          createdAt: p.createdAt.toISOString(),
+          ticket: {
+            id: p.ticket.id,
+            name: p.ticket.name,
+            eventDateId: p.ticket.timeSlot.eventDateId,
+          },
+          event: {
+            id: p.ticket.timeSlot.eventDate.event.id,
+            name: p.ticket.timeSlot.eventDate.event.name,
+            startDate: p.ticket.timeSlot.eventDate.date.toISOString(),
+            endDate: p.ticket.timeSlot.eventDate.date.toISOString(),
+          },
+        }))
+
+        return apiSuccess({
+          results: formattedPurchases,
+          total: formattedPurchases.length,
+        })
       }),
     },
   },
 })
-
