@@ -1,5 +1,5 @@
 import { db } from "@/database"
-import { event, eventDate } from "@/database/schema"
+import { event, eventDate, timeSlot } from "@/database/schema"
 import { EventType } from "@/enums/event-type.enum"
 import { ScheduleType } from "@/enums/schedule-type.enum"
 import { createServerFn } from "@tanstack/react-start"
@@ -14,6 +14,7 @@ import {
   ilike,
   inArray,
   lte,
+  sql,
 } from "drizzle-orm"
 import { z } from "zod"
 
@@ -33,6 +34,21 @@ export const getEventsFn = createServerFn({ method: "GET" })
   .inputValidator(getEventsValidator)
   .handler(async ({ data }) => {
     const conditions = []
+
+    conditions.push(
+      exists(
+        db
+          .select({ id: timeSlot.id })
+          .from(timeSlot)
+          .innerJoin(eventDate, eq(timeSlot.eventDateId, eventDate.id))
+          .where(
+            and(
+              eq(eventDate.eventId, event.id),
+              gte(sql`coalesce(${timeSlot.endTime}, ${timeSlot.startTime})`, new Date())
+            )
+          )
+      )
+    )
 
     if (data?.search) {
       conditions.push(ilike(event.name, `%${data.search}%`))

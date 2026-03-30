@@ -163,10 +163,23 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
           for (const item of items) {
             const ticketRecord = await db.query.ticket.findFirst({
               where: eq(ticket.id, item.ticketId),
+              with: {
+                timeSlot: true,
+              },
             })
 
             if (!ticketRecord) {
               return apiError("Ticket not found", 404)
+            }
+
+            const effectiveEndDate = 
+              ticketRecord.timeSlot.endTime ?? ticketRecord.timeSlot.startTime
+
+            if (new Date(effectiveEndDate) < new Date()) {
+              return apiError(
+                `Ticket "${ticketRecord.name}" is no longer available (Event expired)`,
+                400
+              )
             }
 
             const soldQty = await soldQtyForTicket(item.ticketId)
