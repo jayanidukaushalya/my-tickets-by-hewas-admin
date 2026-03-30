@@ -43,7 +43,7 @@ export function EventCard({ event }: { event: EventData }) {
             (ts.tickets?.reduce(
               (accT, t) =>
                 accT +
-                (t.purchases?.reduce(
+                (t.orderLines?.reduce(
                   (accP, p: { qty: number }) => accP + (p.qty || 0),
                   0
                 ) || 0),

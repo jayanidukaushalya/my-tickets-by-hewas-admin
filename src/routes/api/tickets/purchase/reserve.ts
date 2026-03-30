@@ -1,5 +1,11 @@
 import { db } from "@/database"
-import { customer, purchaseSession, ticket } from "@/database/schema"
+import {
+  customer,
+  orderSession,
+  orderSessionLine,
+  orderLine,
+  ticket,
+} from "@/database/schema"
 import {
   apiError,
   apiSuccess,
@@ -11,11 +17,10 @@ import {
   CustomerIdentityConflictError,
   ensureAuthCustomer,
 } from "@/server/api/ensure-auth-customer"
-import { createFileRoute } from "@tanstack/react-router"
-import { and, eq, gt } from "drizzle-orm"
-import { ulid } from "ulid"
-import { z } from "zod"
 import { PAYHERE_MERCHANT_ID, PAYHERE_MERCHANT_SECRET } from "@/configs/env.config"
+import { createFileRoute } from "@tanstack/react-router"
+import { and, eq, gt, sql } from "drizzle-orm"
+import { z } from "zod"
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -26,21 +31,51 @@ const lineItemSchema = z.object({
   qty: z.number().int().positive("Quantity must be a positive integer"),
 })
 
-const authenticatedReserveSchema = z
-  .object({
-    items: z.array(lineItemSchema).min(1, "At least one ticket is required"),
-    phone: z.string().min(7, "A valid contact number is required"),
-  })
+const authenticatedReserveSchema = z.object({
+  items: z.array(lineItemSchema).min(1, "At least one ticket is required"),
+  phone: z.string().min(7, "A valid contact number is required"),
+})
 
-// Schema for guest users (email required)
-const guestReserveSchema = z
-  .object({
-    items: z.array(lineItemSchema).min(1, "At least one ticket is required"),
-    email: z.email("A valid email address is required"),
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
-    phone: z.string().min(7, "A valid contact number is required"),
-  })
+const guestReserveSchema = z.object({
+  items: z.array(lineItemSchema).min(1, "At least one ticket is required"),
+  email: z.email("A valid email address is required"),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  phone: z.string().min(7, "A valid contact number is required"),
+})
+
+// ---------------------------------------------------------------------------
+// Availability (sold = paid order lines; reserved = unpaid session lines with live session)
+// ---------------------------------------------------------------------------
+
+async function soldQtyForTicket(ticketId: string): Promise<number> {
+  const [row] = await db
+    .select({
+      n: sql<number>`coalesce(sum(${orderLine.qty}), 0)`,
+    })
+    .from(orderLine)
+    .where(eq(orderLine.ticketId, ticketId))
+  return Number(row?.n ?? 0)
+}
+
+async function reservedQtyForTicket(ticketId: string): Promise<number> {
+  const [row] = await db
+    .select({
+      n: sql<number>`coalesce(sum(${orderSessionLine.qty}), 0)`,
+    })
+    .from(orderSessionLine)
+    .innerJoin(
+      orderSession,
+      eq(orderSessionLine.orderSessionId, orderSession.id)
+    )
+    .where(
+      and(
+        eq(orderSessionLine.ticketId, ticketId),
+        gt(orderSession.expireAt, new Date())
+      )
+    )
+  return Number(row?.n ?? 0)
+}
 
 // ---------------------------------------------------------------------------
 // Route
@@ -54,14 +89,8 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
       /**
        * Step 1 of 2 in the purchase flow.
        *
-       * - Supports both authenticated and guest users.
-       * - For authenticated users: extracts Firebase UID from token and finds/creates customer by UID.
-       * - For guest users: finds or creates a customer record by email (no auth required).
-       * - Verifies enough seats are available (unsold + un-reserved).
-       * - Locks the requested seats in a `purchaseSession` for 15 minutes.
-       *
-       * The client must complete payment and call `/api/tickets/purchase/confirm`
-       * with the returned `sessionId` before the session expires.
+       * - Creates one `order_session` and one `order_session_line` per cart line.
+       * - Verifies availability (sold + active reservations).
        */
       POST: optionalAuthHandler(async ({ request, user }) => {
         try {
@@ -71,7 +100,6 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
           let items: Array<{ ticketId: string; qty: number }>
 
           if (user) {
-            // Authenticated user flow
             const parsed = authenticatedReserveSchema.safeParse(body)
 
             if (!parsed.success) {
@@ -93,7 +121,6 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
               customerId = customerRecord.id
             }
           } else {
-            // Guest user flow
             const parsed = guestReserveSchema.safeParse(body)
 
             if (!parsed.success) {
@@ -104,7 +131,6 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
             const { email, firstName, lastName } = parsed.data
             const phone = parsed.data.phone.trim()
 
-            // Find or create customer by email
             let customerRecord = await db.query.customer.findFirst({
               where: eq(customer.email, email),
             })
@@ -133,38 +159,18 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
           }
 
           const expireAt = new Date(Date.now() + 15 * 60 * 1000)
-          const reservations: Array<{
-            sessionId: string
-            expireAt: Date
-            qty: number
-            ticket: { id: string; name: string; price: string }
-          }> = []
-          let totalAmount = 0
 
           for (const item of items) {
             const ticketRecord = await db.query.ticket.findFirst({
               where: eq(ticket.id, item.ticketId),
-              with: {
-                purchases: { columns: { qty: true } },
-                purchaseSessions: {
-                  where: and(gt(purchaseSession.expireAt, new Date())),
-                  columns: { qty: true },
-                },
-              },
             })
 
             if (!ticketRecord) {
               return apiError("Ticket not found", 404)
             }
 
-            const soldQty = ticketRecord.purchases.reduce(
-              (sum, p) => sum + p.qty,
-              0
-            )
-            const reservedQty = ticketRecord.purchaseSessions.reduce(
-              (sum, s) => sum + s.qty,
-              0
-            )
+            const soldQty = await soldQtyForTicket(item.ticketId)
+            const reservedQty = await reservedQtyForTicket(item.ticketId)
             const availableQty = ticketRecord.qty - soldQty - reservedQty
 
             if (item.qty > availableQty) {
@@ -175,47 +181,75 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
                 409
               )
             }
-
-            const [session] = await db
-              .insert(purchaseSession)
-              .values({
-                customerId,
-                ticketId: item.ticketId,
-                qty: item.qty,
-                expireAt,
-              })
-              .returning()
-
-            reservations.push({
-              sessionId: session.id,
-              expireAt: session.expireAt,
-              qty: session.qty,
-              ticket: {
-                id: ticketRecord.id,
-                name: ticketRecord.name,
-                price: String(ticketRecord.price),
-              },
-            })
-
-            totalAmount += Number.parseFloat(String(ticketRecord.price)) * item.qty
           }
+
+          const { session, reservations, totalAmount } = await db.transaction(
+            async (tx) => {
+              const [s] = await tx
+                .insert(orderSession)
+                .values({
+                  customerId,
+                  expireAt,
+                })
+                .returning()
+
+              const reservations: Array<{
+                sessionId: string
+                expireAt: Date
+                qty: number
+                ticket: { id: string; name: string; price: string }
+              }> = []
+              let totalAmount = 0
+
+              for (const item of items) {
+                const ticketRecord = await tx.query.ticket.findFirst({
+                  where: eq(ticket.id, item.ticketId),
+                })
+                if (!ticketRecord) {
+                  throw new Error("Ticket not found")
+                }
+
+                const [line] = await tx
+                  .insert(orderSessionLine)
+                  .values({
+                    orderSessionId: s.id,
+                    ticketId: item.ticketId,
+                    qty: item.qty,
+                  })
+                  .returning()
+
+                reservations.push({
+                  sessionId: line.id,
+                  expireAt: s.expireAt,
+                  qty: line.qty,
+                  ticket: {
+                    id: ticketRecord.id,
+                    name: ticketRecord.name,
+                    price: String(ticketRecord.price),
+                  },
+                })
+
+                totalAmount +=
+                  Number.parseFloat(String(ticketRecord.price)) * item.qty
+              }
+
+              return { session: s, reservations, totalAmount }
+            }
+          )
 
           if (!PAYHERE_MERCHANT_ID || !PAYHERE_MERCHANT_SECRET) {
             return apiError("Payment gateway configuration is missing", 500)
           }
 
-          const orderId =
-            reservations.length === 1 ? reservations[0].sessionId : ulid()
+          const payhereOrderId = session.id
           const itemsDescription = reservations
             .map((r) => `${r.qty}x ${r.ticket.name}`)
             .join(", ")
 
           return apiSuccess(
             {
-              sessionId: reservations[0]?.sessionId,
-              sessionIds: reservations.map((r) => r.sessionId),
-              sessions: reservations,
-              expireAt: reservations[0]?.expireAt,
+              orderSessionId: session.id,
+              expireAt: session.expireAt,
               qty: reservations.reduce((sum, r) => sum + r.qty, 0),
               totalAmount: totalAmount.toFixed(2),
               payment: {
@@ -224,7 +258,7 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
                 merchantId: PAYHERE_MERCHANT_ID,
                 merchantSecret: PAYHERE_MERCHANT_SECRET,
                 notifyUrl: `${process.env.SITE_URL ?? "http://localhost:3000"}/api/tickets/purchase/confirm`,
-                orderId,
+                orderId: payhereOrderId,
                 itemsDescription,
                 currency: "LKR",
                 amount: totalAmount.toFixed(2),

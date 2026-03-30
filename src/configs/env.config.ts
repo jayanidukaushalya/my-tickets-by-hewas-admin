@@ -20,7 +20,8 @@ export const FIREBASE_PRIVATE_KEY = (
   process.env.FIREBASE_PRIVATE_KEY as string
 )?.replace(/\\n/g, "\n")
 
-export const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string
+export const GOOGLE_MAPS_API_KEY = import.meta.env
+  .VITE_GOOGLE_MAPS_API_KEY as string
 export const GOOGLE_MAPS_MAP_ID = import.meta.env
   ?.VITE_GOOGLE_MAPS_MAP_ID as string
 
@@ -36,3 +37,6 @@ export const CLOUDFLARE_R2_PUBLIC_URL = process.env
 
 export const PAYHERE_MERCHANT_ID = process.env.PAYHERE_MERCHANT_ID
 export const PAYHERE_MERCHANT_SECRET = process.env.PAYHERE_MERCHANT_SECRET
+
+export const RESEND_API_KEY = process.env.RESEND_API_KEY as string
+export const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL as string

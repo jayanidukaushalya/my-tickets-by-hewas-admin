@@ -1,7 +1,13 @@
 import { db } from "@/database"
-import { purchase, purchaseSession, ticket } from "@/database/schema"
 import {
-  apiError,
+  order,
+  orderLine,
+  orderSession,
+  orderSessionLine,
+  ticket,
+} from "@/database/schema"
+import { sendPurchasedTicketsConfirmationEmail } from "@/integrations/resend/send-purchased-tickets-email"
+import {
   apiSuccess,
   apiValidationError,
   corsPreflightResponse,
@@ -17,7 +23,7 @@ import { z } from "zod"
 // ---------------------------------------------------------------------------
 
 const confirmSchema = z.object({
-  sessionIds: z.array(z.string().min(1)).min(1, "Session IDs are required"),
+  orderSessionId: z.string().min(1, "orderSessionId is required"),
 })
 
 // ---------------------------------------------------------------------------
@@ -32,13 +38,9 @@ export const Route = createFileRoute("/api/tickets/purchase/confirm")({
       /**
        * Step 2 of 2 in the purchase flow.
        *
-       * - Verifies the session exists and has not expired.
-       * - Creates a permanent `purchase` record at the ticket's current price.
-       * - Deletes the `purchaseSession` so the reserved seats are released from
-       *   reservation tracking and cannot be promoted twice.
-       *
-       * Call this endpoint after the payment gateway confirms a successful
-       * payment, passing the `sessionId` returned by `/reserve`.
+       * - Loads all `order_session_line` rows for the given `order_session`.
+       * - Creates one `orders` row and one `order_line` per line.
+       * - Deletes the `order_session` (cascades to session lines).
        */
       POST: publicHandler(async ({ request }) => {
         const body = await parseJsonBody(request)
@@ -48,67 +50,77 @@ export const Route = createFileRoute("/api/tickets/purchase/confirm")({
           return apiValidationError(z.treeifyError(parsed.error))
         }
 
-        const sessionIds = [...new Set(parsed.data.sessionIds)]
+        const { orderSessionId } = parsed.data
 
-        const sessions = await db.query.purchaseSession.findMany({
-          where: inArray(purchaseSession.id, sessionIds),
+        const lines = await db.query.orderSessionLine.findMany({
+          where: eq(orderSessionLine.orderSessionId, orderSessionId),
+          with: {
+            orderSession: true,
+          },
         })
 
-        if (sessions.length !== sessionIds.length) {
-          return apiError("One or more purchase sessions not found", 404)
-        }
+        const sessionRow = lines[0]!.orderSession
 
-        const now = new Date()
-        const expired = sessions.find((s) => s.expireAt < now)
-        if (expired) {
-          await db
-            .delete(purchaseSession)
-            .where(eq(purchaseSession.id, expired.id))
-          return apiError(
-            "Purchase session has expired. Please start over.",
-            410
-          )
-        }
-
-        const ticketIds = [...new Set(sessions.map((s) => s.ticketId))]
+        const ticketIds = [...new Set(lines.map((l) => l.ticketId))]
         const ticketRecords = await db.query.ticket.findMany({
           where: inArray(ticket.id, ticketIds),
         })
         const ticketById = new Map(ticketRecords.map((t) => [t.id, t]))
 
-        for (const session of sessions) {
-          if (!ticketById.get(session.ticketId)) {
-            return apiError("Associated ticket no longer exists", 404)
-          }
-        }
+        const totalAmount = lines.reduce((sum, line) => {
+          const tr = ticketById.get(line.ticketId)!
+          return sum + Number.parseFloat(String(tr.price)) * line.qty
+        }, 0)
 
-        const newPurchases = await db.transaction(async (tx) => {
-          const insertedAll = []
-          for (const session of sessions) {
-            const ticketRecord = ticketById.get(session.ticketId)!
+        const customerId = sessionRow.customerId
+
+        const result = await db.transaction(async (tx) => {
+          const [orderResult] = await tx
+            .insert(order)
+            .values({
+              customerId,
+              totalAmount: totalAmount.toFixed(2),
+              currency: "LKR",
+              payhereOrderId: orderSessionId,
+            })
+            .returning()
+
+          const insertedLines = []
+          for (const line of lines) {
+            const ticketRecord = ticketById.get(line.ticketId)!
             const [inserted] = await tx
-              .insert(purchase)
+              .insert(orderLine)
               .values({
-                customerId: session.customerId,
-                ticketId: session.ticketId,
-                qty: session.qty,
+                orderId: orderResult.id,
+                ticketId: line.ticketId,
+                qty: line.qty,
                 price: ticketRecord.price,
                 isActivated: false,
               })
               .returning()
-            insertedAll.push(inserted)
+            insertedLines.push(inserted)
           }
 
           await tx
-            .delete(purchaseSession)
-            .where(inArray(purchaseSession.id, sessionIds))
+            .delete(orderSession)
+            .where(eq(orderSession.id, orderSessionId))
 
-          return insertedAll
+          return { order: orderResult, insertedLines }
         })
+
+        void sendPurchasedTicketsConfirmationEmail(result.order.id).catch(
+          (err) => {
+            console.error(
+              "[API] Purchase confirmation email (background):",
+              err
+            )
+          }
+        )
 
         return apiSuccess(
           {
-            purchases: newPurchases.map((p) => ({
+            orderId: result.order.id,
+            purchases: result.insertedLines.map((p) => ({
               purchaseId: p.id,
               ticketId: p.ticketId,
               qty: p.qty,
@@ -116,7 +128,7 @@ export const Route = createFileRoute("/api/tickets/purchase/confirm")({
               isActivated: p.isActivated,
               createdAt: p.createdAt,
             })),
-            count: newPurchases.length,
+            count: result.insertedLines.length,
           },
           201
         )

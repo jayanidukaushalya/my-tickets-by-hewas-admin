@@ -1,8 +1,9 @@
 import { db } from "@/database"
-import { customer, purchase } from "@/database/schema"
+import { customer, order } from "@/database/schema"
 import { apiSuccess, corsPreflightResponse, privateHandler } from "@/server/api"
 import { createFileRoute } from "@tanstack/react-router"
 import { desc, eq } from "drizzle-orm"
+import { format } from "date-fns"
 
 export const Route = createFileRoute("/api/tickets/purchase/")({
   server: {
@@ -21,17 +22,25 @@ export const Route = createFileRoute("/api/tickets/purchase/")({
           })
         }
 
-        const purchases = await db.query.purchase.findMany({
-          where: eq(purchase.customerId, currentCustomer.id),
-          orderBy: [desc(purchase.createdAt)],
+        const orders = await db.query.order.findMany({
+          where: eq(order.customerId, currentCustomer.id),
+          orderBy: [desc(order.createdAt)],
           with: {
-            ticket: {
+            orderLines: {
               with: {
-                timeSlot: {
+                ticket: {
                   with: {
-                    eventDate: {
+                    timeSlot: {
                       with: {
-                        event: true,
+                        eventDate: {
+                          with: {
+                            event: {
+                              with: {
+                                location: true,
+                              },
+                            },
+                          },
+                        },
                       },
                     },
                   },
@@ -41,29 +50,47 @@ export const Route = createFileRoute("/api/tickets/purchase/")({
           },
         })
 
-        const formattedPurchases = purchases.map((p) => ({
-          id: p.id,
-          ticketId: p.ticketId,
-          qty: p.qty,
-          price: p.price,
-          isActivated: p.isActivated,
-          createdAt: p.createdAt.toISOString(),
-          ticket: {
-            id: p.ticket.id,
-            name: p.ticket.name,
-            eventDateId: p.ticket.timeSlot.eventDateId,
-          },
-          event: {
-            id: p.ticket.timeSlot.eventDate.event.id,
-            name: p.ticket.timeSlot.eventDate.event.name,
-            startDate: p.ticket.timeSlot.eventDate.date.toISOString(),
-            endDate: p.ticket.timeSlot.eventDate.date.toISOString(),
-          },
-        }))
+        const now = new Date()
+
+        const formattedTickets = orders.flatMap((o) =>
+          o.orderLines.map((p) => {
+            const event = p.ticket.timeSlot.eventDate.event
+            const timeSlot = p.ticket.timeSlot
+
+            const venueLabel = [event.location?.venue, event.location?.address]
+              .filter(Boolean)
+              .join(", ")
+
+            const endDate = timeSlot.endTime ?? timeSlot.startTime
+            const status = p.isActivated
+              ? "used"
+              : endDate < now
+                ? "expired"
+                : "valid"
+
+            return {
+              id: p.id,
+              eventId: event.id,
+              eventTitle: event.name,
+              eventDate: venueLabel
+                ? `${format(timeSlot.startTime, "EEE, dd MMM | hh:mm a")} | ${venueLabel}`
+                : format(timeSlot.startTime, "EEE, dd MMM | hh:mm a"),
+              eventImageUrl: event.image,
+              eventLocation: venueLabel,
+              userId: currentCustomer.firebaseUid,
+              ticketName: p.ticket.name,
+              purchaseDate: format(p.createdAt, "dd MMM yyyy"),
+              qrCode: null,
+              status,
+              qty: p.qty,
+              price: Number(p.price),
+            }
+          })
+        )
 
         return apiSuccess({
-          results: formattedPurchases,
-          total: formattedPurchases.length,
+          results: formattedTickets,
+          total: formattedTickets.length,
         })
       }),
     },

@@ -32,7 +32,7 @@ function TicketIncreaseForm({
   onCancelEditing: () => void
 }) {
   const router = useRouter()
-  const soldCount = t.purchases.reduce((acc, p) => acc + p.qty, 0)
+  const soldCount = t.orderLines.reduce((acc, p) => acc + p.qty, 0)
   const availableCount = Math.max(0, t.qty - soldCount)
   const priceText = Number(t.price) === 0 ? "Free" : formatCurrency(t.price)
 
@@ -147,7 +147,7 @@ function TicketRow({
   onAddVariant?: () => void
   isAddingVariant?: boolean
 }) {
-  const soldCount = t.purchases.reduce((acc, p) => acc + p.qty, 0)
+  const soldCount = t.orderLines.reduce((acc, p) => acc + p.qty, 0)
   const availableCount = Math.max(0, t.qty - soldCount)
   const priceText = Number(t.price) === 0 ? "Free" : formatCurrency(t.price)
 

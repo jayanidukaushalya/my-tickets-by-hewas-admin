@@ -81,7 +81,7 @@ function PurchasesComponent() {
             <div className="flex flex-col gap-4">
               {results.map((purchase) => {
                 const event = purchase.ticket.timeSlot.eventDate.event
-                const customerName = `${purchase.customer.firstName ?? ""} ${purchase.customer.lastName ?? ""}`.trim()
+                const customerName = `${purchase.order.customer.firstName ?? ""} ${purchase.order.customer.lastName ?? ""}`.trim()
                 
                 return (
                   <div
@@ -108,7 +108,7 @@ function PurchasesComponent() {
                           <span className="font-medium text-foreground/80">
                             {customerName || "Anonymous User"}
                           </span>
-                          <span>({purchase.customer.email})</span>
+                          <span>({purchase.order.customer.email})</span>
                         </div>
                       </div>
                     </div>
@@ -118,7 +118,7 @@ function PurchasesComponent() {
                         {formatCurrency(Number(purchase.price) * purchase.qty)}
                       </span>
                       <div className="flex flex-col items-end text-xs text-muted-foreground">
-                        <span>Order #{purchase.id.slice(-8).toUpperCase()}</span>
+                        <span>Order #{purchase.order.id.slice(-8).toUpperCase()}</span>
                         <span>{format(new Date(purchase.createdAt), "MMM d, yyyy")}</span>
                       </div>
                     </div>

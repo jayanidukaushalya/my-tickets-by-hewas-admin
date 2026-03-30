@@ -1,5 +1,5 @@
 import { db } from "@/database"
-import { purchase } from "@/database/schema"
+import { orderLine } from "@/database/schema"
 import { createServerFn } from "@tanstack/react-start"
 import { count, desc } from "drizzle-orm"
 import { z } from "zod/v3"
@@ -15,12 +15,16 @@ export const getPurchasesFn = createServerFn({ method: "GET" })
     const limit = data?.limit || 10
     const offset = data?.page ? (data.page - 1) * limit : 0
 
-    const results = await db.query.purchase.findMany({
-      orderBy: [desc(purchase.createdAt)],
+    const results = await db.query.orderLine.findMany({
+      orderBy: [desc(orderLine.createdAt)],
       limit,
       offset,
       with: {
-        customer: true,
+        order: {
+          with: {
+            customer: true,
+          },
+        },
         ticket: {
           with: {
             timeSlot: {
@@ -39,7 +43,7 @@ export const getPurchasesFn = createServerFn({ method: "GET" })
 
     const [{ value: total }] = await db
       .select({ value: count() })
-      .from(purchase)
+      .from(orderLine)
 
     return {
       results,

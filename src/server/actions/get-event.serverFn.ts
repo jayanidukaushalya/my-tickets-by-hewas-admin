@@ -16,7 +16,7 @@ export const getEventFn = createServerFn({ method: "GET" })
               with: {
                 tickets: {
                   with: {
-                    purchases: {
+                    orderLines: {
                       columns: {
                         qty: true,
                       },
