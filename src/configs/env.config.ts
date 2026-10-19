@@ -14,10 +14,6 @@ export const SITE_URL = process.env.SITE_URL as string
 export const BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET as string
 
 export const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID as string
-export const FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL as string
-export const FIREBASE_PRIVATE_KEY = (
-  process.env.FIREBASE_PRIVATE_KEY as string
-)?.replace(/\\n/g, "\n")
 
 export const GOOGLE_MAPS_API_KEY = import.meta.env
   .VITE_GOOGLE_MAPS_API_KEY as string

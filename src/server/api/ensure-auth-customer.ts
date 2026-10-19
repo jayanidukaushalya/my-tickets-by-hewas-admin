@@ -1,7 +1,7 @@
 import { db } from "@/database"
 import { customer } from "@/database/schema"
 import { eq, isNull } from "drizzle-orm"
-import type { DecodedIdToken } from "firebase-admin/auth"
+import type { FirebaseUser } from "./auth"
 
 export class CustomerIdentityConflictError extends Error {
   constructor() {
@@ -23,7 +23,7 @@ function extractNameParts(name?: string) {
   }
 }
 
-export async function ensureAuthCustomer(user: DecodedIdToken) {
+export async function ensureAuthCustomer(user: FirebaseUser) {
   if (!user.email) {
     throw new Error("Authenticated user must have an email")
   }

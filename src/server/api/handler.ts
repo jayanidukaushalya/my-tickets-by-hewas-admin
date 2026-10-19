@@ -1,5 +1,4 @@
-import type { DecodedIdToken } from "firebase-admin/auth"
-import { verifyFirebaseToken } from "./auth"
+import { verifyFirebaseToken, type FirebaseUser } from "./auth"
 import { apiError } from "./response"
 import { auth } from "@/integrations/better-auth/auth"
 
@@ -9,11 +8,11 @@ export type ApiHandlerContext = {
 }
 
 export type AuthenticatedApiHandlerContext = ApiHandlerContext & {
-  user: DecodedIdToken
+  user: FirebaseUser
 }
 
 export type OptionallyAuthenticatedApiHandlerContext = ApiHandlerContext & {
-  user?: DecodedIdToken
+  user?: FirebaseUser
 }
 
 export type AdminAuthenticatedApiHandlerContext = ApiHandlerContext & {

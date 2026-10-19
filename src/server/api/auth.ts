@@ -1,10 +1,22 @@
-import { firebaseAuth } from "@/integrations/firebase"
-import type { DecodedIdToken } from "firebase-admin/auth"
+import { FIREBASE_PROJECT_ID } from "@/configs/env.config"
+import { createRemoteJWKSet, errors, jwtVerify } from "jose"
 import { apiError } from "./response"
+
+export type FirebaseUser = {
+  uid: string
+  email?: string
+  name?: string
+}
+
+const firebaseKeys = createRemoteJWKSet(
+  new URL(
+    "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+  )
+)
 
 export async function verifyFirebaseToken(
   request: Request
-): Promise<DecodedIdToken | Response> {
+): Promise<FirebaseUser | Response> {
   const authHeader = request.headers.get("Authorization")
 
   if (!authHeader?.startsWith("Bearer ")) {
@@ -21,16 +33,23 @@ export async function verifyFirebaseToken(
   }
 
   try {
-    const decoded = await firebaseAuth.verifyIdToken(idToken)
-    return decoded
-  } catch (cause) {
-    const message = cause instanceof Error ? cause.message : String(cause)
+    const { payload } = await jwtVerify(idToken, firebaseKeys, {
+      issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`,
+      audience: FIREBASE_PROJECT_ID,
+      algorithms: ["RS256"],
+    })
 
-    if (
-      message.includes("auth/id-token-expired") ||
-      message.includes("expired") ||
-      message.includes("revoked")
-    ) {
+    if (!payload.sub) {
+      return apiError("Invalid or unauthorized token", 403)
+    }
+
+    return {
+      uid: payload.sub,
+      email: typeof payload.email === "string" ? payload.email : undefined,
+      name: typeof payload.name === "string" ? payload.name : undefined,
+    }
+  } catch (cause) {
+    if (cause instanceof errors.JWTExpired) {
       return apiError("Token has expired or been revoked", 401)
     }
 
