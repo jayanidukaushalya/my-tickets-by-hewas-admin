@@ -17,7 +17,13 @@ const descSchema = z.object({
 
 type EventType = NonNullable<Awaited<ReturnType<typeof getEventFn>>>
 
-export function EventDescription({ event }: { event: EventType }) {
+export function EventDescription({
+  event,
+  readOnly = false,
+}: {
+  event: EventType
+  readOnly?: boolean
+}) {
   const router = useRouter()
   const [isEditingDesc, setIsEditingDesc] = useState(false)
   const descForm = useForm<z.infer<typeof descSchema>>({
@@ -51,6 +57,7 @@ export function EventDescription({ event }: { event: EventType }) {
             size="sm"
             className="size-8 p-0"
             onClick={() => setIsEditingDesc(true)}
+            disabled={readOnly}
           >
             <HugeiconsIcon icon={PencilEdit01Icon} className="size-4" />
           </Button>

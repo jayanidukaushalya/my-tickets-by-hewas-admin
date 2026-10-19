@@ -31,7 +31,13 @@ const locSchema = z.object({
 
 type EventType = NonNullable<Awaited<ReturnType<typeof getEventFn>>>
 
-export function EventLocation({ event }: { event: EventType }) {
+export function EventLocation({
+  event,
+  readOnly = false,
+}: {
+  event: EventType
+  readOnly?: boolean
+}) {
   const router = useRouter()
   const [isEditingLoc, setIsEditingLoc] = useState(false)
   const locForm = useForm<z.infer<typeof locSchema>>({
@@ -86,6 +92,7 @@ export function EventLocation({ event }: { event: EventType }) {
             size="sm"
             className="size-8 p-0"
             onClick={() => setIsEditingLoc(true)}
+            disabled={readOnly}
           >
             <HugeiconsIcon icon={PencilEdit01Icon} className="size-4" />
           </Button>

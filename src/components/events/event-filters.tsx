@@ -36,8 +36,6 @@ interface EventFiltersProps {
   onDateRangeChange: (val: { from?: string; to?: string } | null) => void
 }
 
-
-
 export function EventFilters({
   search,
   eventType,

@@ -1,6 +1,7 @@
 import { db } from "@/database"
 import { orderLine, ticket } from "@/database/schema"
 import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
+import { assertTimeSlotEditable } from "@/server/event-guard"
 import { createServerFn } from "@tanstack/react-start"
 import { eq, sql } from "drizzle-orm"
 import { z } from "zod"
@@ -19,6 +20,8 @@ export const saveTicketAction = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data }) => {
+    await assertTimeSlotEditable(data.timeSlotId)
+
     if (data.id) {
       const [{ sold }] = await db
         .select({

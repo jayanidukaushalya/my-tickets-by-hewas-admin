@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { getEventFn } from "@/server/actions/get-event.serverFn"
 import { updateEventAction } from "@/server/actions/update-event.serverFn"
 import { ImageUpload01Icon } from "@hugeicons/core-free-icons"
@@ -9,7 +10,13 @@ import { toast } from "sonner"
 
 type EventType = NonNullable<Awaited<ReturnType<typeof getEventFn>>>
 
-export function EventBanner({ event }: { event: EventType }) {
+export function EventBanner({
+  event,
+  readOnly = false,
+}: {
+  event: EventType
+  readOnly?: boolean
+}) {
   const router = useRouter()
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -39,26 +46,31 @@ export function EventBanner({ event }: { event: EventType }) {
       <img
         src={event.image || "https://placehold.co/600x400?text=No+Image"}
         alt={event.name}
-        className="aspect-video w-full object-cover transition-opacity group-hover:opacity-80"
+        className={cn(
+          "aspect-video w-full object-cover transition-opacity",
+          !readOnly && "group-hover:opacity-80"
+        )}
       />
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-        <Button
-          variant="secondary"
-          className="gap-2 backdrop-blur-md"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploadingImage}
-        >
-          <HugeiconsIcon icon={ImageUpload01Icon} className="size-4" />
-          {isUploadingImage ? "Uploading..." : "Change Image"}
-        </Button>
-        <input
-          type="file"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleImageChange}
-          accept="image/*"
-        />
-      </div>
+      {!readOnly && (
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+          <Button
+            variant="secondary"
+            className="gap-2 backdrop-blur-md"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploadingImage}
+          >
+            <HugeiconsIcon icon={ImageUpload01Icon} className="size-4" />
+            {isUploadingImage ? "Uploading..." : "Change Image"}
+          </Button>
+          <input
+            type="file"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+            accept="image/*"
+          />
+        </div>
+      )}
     </div>
   )
 }

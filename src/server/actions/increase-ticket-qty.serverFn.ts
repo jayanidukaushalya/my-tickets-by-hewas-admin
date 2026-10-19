@@ -1,6 +1,7 @@
 import { db } from "@/database"
 import { ticket } from "@/database/schema"
 import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
+import { assertTicketEditable } from "@/server/event-guard"
 import { createServerFn } from "@tanstack/react-start"
 import { eq, sql } from "drizzle-orm"
 import { z } from "zod"
@@ -14,6 +15,8 @@ export const increaseTicketQtyAction = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data }) => {
+    await assertTicketEditable(data.id)
+
     const updated = await db
       .update(ticket)
       .set({ qty: sql`${ticket.qty} + ${data.addQty}` })

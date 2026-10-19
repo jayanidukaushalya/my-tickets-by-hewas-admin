@@ -6,6 +6,7 @@ import { EventLanguages } from "@/components/events/event-details/event-language
 import { EventLocation } from "@/components/events/event-details/event-location"
 import { EventTickets } from "@/components/events/event-details/event-tickets"
 import { Badge } from "@/components/ui/badge"
+import { isEventExpired } from "@/lib/event-status"
 import { formatEnum } from "@/lib/utils"
 import { GoogleMapsProvider } from "@/providers/google-maps-provider"
 import { getEventFn } from "@/server/actions/get-event.serverFn"
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/_dashboard/events/$eventId")({
 
 function EventDetailsPage() {
   const { event } = Route.useLoaderData()
+  const isExpired = isEventExpired(event.eventDates)
 
   return (
     <>
@@ -47,20 +49,24 @@ function EventDetailsPage() {
               <div className="flex gap-2">
                 <Badge>{formatEnum(event.eventType)}</Badge>
                 <Badge>{formatEnum(event.scheduleType)}</Badge>
+                {isExpired && <Badge variant="secondary">Expired</Badge>}
               </div>
             </div>
 
             <div className="grid gap-8 md:grid-cols-5">
               <div className="flex flex-col gap-8 md:col-span-3">
-                <EventBanner event={event} />
-                <EventDescription event={event} />
-                <EventTickets eventDates={event.eventDates} />
+                <EventBanner event={event} readOnly={isExpired} />
+                <EventDescription event={event} readOnly={isExpired} />
+                <EventTickets
+                  eventDates={event.eventDates}
+                  readOnly={isExpired}
+                />
               </div>
 
               <div className="flex flex-col gap-6 md:col-span-2">
                 <EventDates eventDates={event.eventDates} />
-                <EventLocation event={event} />
-                <EventLanguages event={event} />
+                <EventLocation event={event} readOnly={isExpired} />
+                <EventLanguages event={event} readOnly={isExpired} />
               </div>
             </div>
           </div>

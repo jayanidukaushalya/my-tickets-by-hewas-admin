@@ -140,6 +140,7 @@ function TicketRow({
   onCancelEditing,
   onAddVariant,
   isAddingVariant,
+  readOnly = false,
 }: {
   t: TicketType
   isEditing: boolean
@@ -147,6 +148,7 @@ function TicketRow({
   onCancelEditing: () => void
   onAddVariant?: () => void
   isAddingVariant?: boolean
+  readOnly?: boolean
 }) {
   const soldCount = t.soldQty
   const availableCount = Math.max(0, t.qty - soldCount)
@@ -191,6 +193,7 @@ function TicketRow({
             size="xs"
             className="gap-1.5"
             onClick={onStartEditing}
+            disabled={readOnly}
           >
             <HugeiconsIcon
               icon={Add01Icon}
@@ -207,6 +210,7 @@ function TicketRow({
               size="xs"
               className="gap-1.5 border-dashed border-border/40 text-muted-foreground hover:bg-background/20 hover:text-foreground"
               onClick={onAddVariant}
+              disabled={readOnly}
             >
               <HugeiconsIcon icon={Add01Icon} className="size-3" />
               Variant
@@ -328,7 +332,13 @@ function NewTicketRow({
   )
 }
 
-export function EventTickets({ eventDates }: { eventDates: EventDatesType }) {
+export function EventTickets({
+  eventDates,
+  readOnly = false,
+}: {
+  eventDates: EventDatesType
+  readOnly?: boolean
+}) {
   const [addingToSlot, setAddingToSlot] = useState<string | null>(null)
   const [increasingTicketId, setIncreasingTicketId] = useState<string | null>(
     null
@@ -390,17 +400,19 @@ export function EventTickets({ eventDates }: { eventDates: EventDatesType }) {
                           : undefined
                       }
                       isAddingVariant={addingToSlot === ts.id}
+                      readOnly={readOnly}
                     />
                   ))}
 
                   {ts.tickets.length === 0 && addingToSlot !== ts.id && (
                     <button
                       type="button"
+                      disabled={readOnly}
                       onClick={() => {
                         setAddingToSlot(ts.id)
                         setIncreasingTicketId(null)
                       }}
-                      className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-xl border border-dashed border-border/40 bg-background/10 px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-background/20 hover:text-foreground"
+                      className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-xl border border-dashed border-border/40 bg-background/10 px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-background/20 hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
                       <HugeiconsIcon icon={Add01Icon} className="size-3" />
                       Add Variant

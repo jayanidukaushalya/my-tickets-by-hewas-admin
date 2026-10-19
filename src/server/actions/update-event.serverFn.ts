@@ -2,6 +2,7 @@ import { db } from "@/database"
 import { event, location as locationTable } from "@/database/schema"
 import { uploadImage } from "@/integrations/cloudflare-r2/image"
 import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
+import { assertEventEditable } from "@/server/event-guard"
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm"
 import { z } from "zod/v3"
@@ -36,6 +37,8 @@ export const updateEventAction = createServerFn({ method: "POST" })
     }
   })
   .handler(async ({ data }) => {
+    await assertEventEditable(data.eventId)
+
     let imageUrl: string | undefined
 
     if (data.imageFile) {

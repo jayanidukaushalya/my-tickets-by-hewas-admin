@@ -17,7 +17,13 @@ const langSchema = z.object({
 
 type EventType = NonNullable<Awaited<ReturnType<typeof getEventFn>>>
 
-export function EventLanguages({ event }: { event: EventType }) {
+export function EventLanguages({
+  event,
+  readOnly = false,
+}: {
+  event: EventType
+  readOnly?: boolean
+}) {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const form = useForm<z.infer<typeof langSchema>>({
@@ -56,6 +62,7 @@ export function EventLanguages({ event }: { event: EventType }) {
             variant="ghost"
             size="sm"
             onClick={() => setIsEditing(true)}
+            disabled={readOnly}
             className="size-8 p-0"
           >
             <HugeiconsIcon icon={PencilEdit01Icon} className="size-4" />
