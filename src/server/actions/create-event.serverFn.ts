@@ -11,6 +11,7 @@ import { EventType } from "@/enums/event-type.enum"
 import { ScheduleType } from "@/enums/schedule-type.enum"
 import { uploadImage } from "@/integrations/cloudflare-r2/image"
 import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
+import { eventDateTime, toEventDateKey } from "@/lib/event-time"
 import { createServerFn } from "@tanstack/react-start"
 
 export const createEventAction = createServerFn({ method: "POST" })
@@ -47,84 +48,76 @@ export const createEventAction = createServerFn({ method: "POST" })
       throw new Error("Event image is required")
     }
 
-    // 1. Create Event
-    const [eventResult] = await db
-      .insert(event)
-      .values({
-        name: data.name,
-        image: imageUrl,
-        eventType: data.eventType as EventType,
-        scheduleType: data.scheduleType as ScheduleType,
-        languages: data.languages ? data.languages : null,
-        description: data.description ? data.description : null,
-      })
-      .returning({ id: event.id })
-
-    // 2. Create Location
-    if (data.venue) {
-      await db.insert(locationTable).values({
-        eventId: eventResult.id,
-        venue: data.venue,
-        address: data.address ? data.address : null,
-        latitude: data.lat ? data.lat.toString() : null,
-        longitude: data.lng ? data.lng.toString() : null,
-      })
-    }
-
-    // 3. Create Event Dates, Time Slots, and Tickets
-    const { eventDates } = data
-
-    for (const ed of eventDates) {
-      if (!ed.date) continue
-
-      // Convert date string to Date object
-      const [eventDateResult] = await db
-        .insert(eventDateTable)
+    // All rows are written in one transaction so a failure never leaves a
+    // partially created event behind.
+    const eventId = await db.transaction(async (tx) => {
+      // 1. Create Event
+      const [eventResult] = await tx
+        .insert(event)
         .values({
-          eventId: eventResult.id,
-          date: new Date(ed.date),
+          name: data.name,
+          image: imageUrl,
+          eventType: data.eventType as EventType,
+          scheduleType: data.scheduleType as ScheduleType,
+          languages: data.languages ? data.languages : null,
+          description: data.description ? data.description : null,
         })
-        .returning({ id: eventDateTable.id })
+        .returning({ id: event.id })
 
-      for (const ts of ed.timeSlots) {
-        if (!ts.startTime) continue
+      // 2. Create Location
+      if (data.venue) {
+        await tx.insert(locationTable).values({
+          eventId: eventResult.id,
+          venue: data.venue,
+          address: data.address ? data.address : null,
+          latitude: data.lat ? data.lat.toString() : null,
+          longitude: data.lng ? data.lng.toString() : null,
+        })
+      }
 
-        // Construct full Date objects for startTime and endTime incorporating the ed.date
-        const baseDateStr = new Date(ed.date).toISOString().split("T")[0]
+      // 3. Create Event Dates, Time Slots, and Tickets
+      for (const ed of data.eventDates) {
+        if (!ed.date) continue
 
-        const formatTime = (t: string) =>
-          t.split(":").length === 2 ? `${t}:00` : t
+        // Dates and times are entered in event time (Asia/Colombo)
+        const dateKey = toEventDateKey(ed.date)
 
-        const startDatePos = new Date(
-          `${baseDateStr}T${formatTime(ts.startTime)}`
-        )
-        let endDatePos = null
-        if (ts.endTime) {
-          endDatePos = new Date(`${baseDateStr}T${formatTime(ts.endTime)}`)
-        }
-
-        const [timeSlotResult] = await db
-          .insert(timeSlotTable)
+        const [eventDateResult] = await tx
+          .insert(eventDateTable)
           .values({
-            eventDateId: eventDateResult.id,
-            startTime: startDatePos,
-            endTime: endDatePos,
+            eventId: eventResult.id,
+            date: eventDateTime(dateKey),
           })
-          .returning({ id: timeSlotTable.id })
+          .returning({ id: eventDateTable.id })
 
-        // Insert tickets
-        for (const tick of ts.tickets) {
-          if (!tick.name || !tick.price || !tick.qty) continue
+        for (const ts of ed.timeSlots) {
+          if (!ts.startTime) continue
 
-          await db.insert(ticketTable).values({
-            timeSlotId: timeSlotResult.id,
-            name: tick.name,
-            price: tick.price.toString(),
-            qty: parseInt(tick.qty.toString(), 10),
-          })
+          const [timeSlotResult] = await tx
+            .insert(timeSlotTable)
+            .values({
+              eventDateId: eventDateResult.id,
+              startTime: eventDateTime(dateKey, ts.startTime),
+              endTime: ts.endTime ? eventDateTime(dateKey, ts.endTime) : null,
+            })
+            .returning({ id: timeSlotTable.id })
+
+          // Insert tickets
+          for (const tick of ts.tickets) {
+            if (!tick.name || !tick.price || !tick.qty) continue
+
+            await tx.insert(ticketTable).values({
+              timeSlotId: timeSlotResult.id,
+              name: tick.name,
+              price: tick.price.toString(),
+              qty: parseInt(tick.qty.toString(), 10),
+            })
+          }
         }
       }
-    }
 
-    return { success: true, eventId: eventResult.id }
+      return eventResult.id
+    })
+
+    return { success: true, eventId }
   })

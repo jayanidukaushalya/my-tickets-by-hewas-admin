@@ -45,7 +45,10 @@ export function EventLanguages({ event }: { event: EventType }) {
     <div className="rounded-xl border border-border/40 bg-card/50 p-6 backdrop-blur-xl transition-all">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="flex items-center gap-2 font-semibold">
-          <HugeiconsIcon icon={LanguageSkillIcon} className="size-5 text-primary" />
+          <HugeiconsIcon
+            icon={LanguageSkillIcon}
+            className="size-5 text-primary"
+          />
           Languages
         </h3>
         {!isEditing && (
@@ -61,7 +64,10 @@ export function EventLanguages({ event }: { event: EventType }) {
       </div>
 
       {isEditing ? (
-        <form onSubmit={form.handleSubmit(handleSave)} className="flex flex-col gap-3">
+        <form
+          onSubmit={form.handleSubmit(handleSave)}
+          className="flex flex-col gap-3"
+        >
           <Input
             autoFocus
             {...form.register("languages")}
@@ -94,7 +100,9 @@ export function EventLanguages({ event }: { event: EventType }) {
           {event.languages ? (
             event.languages
           ) : (
-            <span className="text-sm italic font-normal text-muted-foreground">Not specified</span>
+            <span className="text-sm font-normal text-muted-foreground italic">
+              Not specified
+            </span>
           )}
         </div>
       )}

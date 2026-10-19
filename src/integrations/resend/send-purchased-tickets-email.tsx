@@ -1,7 +1,7 @@
 import { db } from "@/database"
 import { orderLine } from "@/database/schema"
 import { formatCurrency } from "@/lib/utils"
-import { format } from "date-fns"
+import { formatInEventTime } from "@/lib/event-time"
 import { eq } from "drizzle-orm"
 import { sendEmail } from "./client"
 import PurchasedTicketsEmail from "./templates/purchased-tickets-email"
@@ -10,9 +10,9 @@ function formatSlotLabel(slot: {
   startTime: Date | string
   endTime: Date | string | null
 }): string {
-  const start = format(new Date(slot.startTime), "h:mm a")
+  const start = formatInEventTime(slot.startTime, "h:mm a")
   if (slot.endTime) {
-    return `${start} — ${format(new Date(slot.endTime), "h:mm a")}`
+    return `${start} — ${formatInEventTime(slot.endTime, "h:mm a")}`
   }
   return `${start} Onwards`
 }
@@ -71,7 +71,9 @@ export async function sendPurchasedTicketsConfirmationEmail(
     return
   }
 
-  const eventIds = new Set(rows.map((r) => r.ticket.timeSlot.eventDate.event.id))
+  const eventIds = new Set(
+    rows.map((r) => r.ticket.timeSlot.eventDate.event.id)
+  )
   const multiEvent = eventIds.size > 1
 
   const lines = rows.map((row) => {
@@ -91,7 +93,7 @@ export async function sendPurchasedTicketsConfirmationEmail(
       return {
         ...base,
         eventName: ev.name,
-        eventDateLabel: format(new Date(ed.date), "EEEE, MMMM do, yyyy"),
+        eventDateLabel: formatInEventTime(ed.date, "EEEE, MMMM do, yyyy"),
         timeSlotLabel: formatSlotLabel(sl),
         venueName: loc?.venue ?? "Venue TBA",
         venueAddress: loc?.address,
@@ -115,8 +117,8 @@ export async function sendPurchasedTicketsConfirmationEmail(
     emailTo.split("@")[0] ||
     "Valued Guest"
 
-  const eventDateLabel = format(
-    new Date(first.ticket.timeSlot.eventDate.date),
+  const eventDateLabel = formatInEventTime(
+    first.ticket.timeSlot.eventDate.date,
     "EEEE, MMMM do, yyyy"
   )
   const timeSlotLabel = formatSlotLabel(slot)

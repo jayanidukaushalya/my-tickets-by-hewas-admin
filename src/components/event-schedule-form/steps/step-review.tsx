@@ -5,15 +5,13 @@ import {
   Ticket01Icon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { format } from "date-fns"
+import { format, parseISO } from "date-fns"
 import { formatCurrency } from "@/lib/utils"
 import { EVENT_TYPE_OPTIONS, SCHEDULE_TYPE_OPTIONS } from "../constants"
 import { ReviewRow, ReviewSection } from "../review-widgets"
 
 import { useFormContext } from "react-hook-form"
 import type { EventFormValues } from "../schema"
-
-
 
 export function StepReview() {
   const { watch } = useFormContext<EventFormValues>()
@@ -50,11 +48,7 @@ export function StepReview() {
           <ReviewRow label="Address" value={values.address || "—"} />
 
           {values.lat && values.lng && (
-            <LocationMap
-              className="mt-4"
-              lat={values.lat}
-              lng={values.lng}
-            />
+            <LocationMap className="mt-4" lat={values.lat} lng={values.lng} />
           )}
         </ReviewSection>
 
@@ -69,7 +63,7 @@ export function StepReview() {
                   strokeWidth={2}
                 />
                 {ed.date
-                  ? format(new Date(ed.date), "EEEE, MMMM d, yyyy")
+                  ? format(parseISO(ed.date), "EEEE, MMMM d, yyyy")
                   : `Date ${idx + 1}`}
               </div>
               {ed.timeSlots.map((ts, tsIdx) => (
@@ -98,7 +92,8 @@ export function StepReview() {
                           className="size-2.5"
                           strokeWidth={2}
                         />
-                        {ticket.name}: {formatCurrency(ticket.price)} × {ticket.qty}
+                        {ticket.name}: {formatCurrency(ticket.price)} ×{" "}
+                        {ticket.qty}
                       </span>
                     ))}
                   </div>

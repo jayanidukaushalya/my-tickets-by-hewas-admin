@@ -12,32 +12,44 @@ export type ExistingImageRef = z.infer<typeof existingImageRefSchema>
 
 export const ticketSchema = z.object({
   name: z.string().min(1, "Ticket name is required"),
-  price: z.string().min(1, "Price is required"),
-  qty: z.string().min(1, "Quantity is required"),
+  price: z
+    .string()
+    .min(1, "Price is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Price must be a positive amount"),
+  qty: z
+    .string()
+    .min(1, "Quantity is required")
+    .regex(/^[1-9]\d*$/, "Quantity must be a whole number of at least 1"),
 })
 
-export const timeSlotSchema = z.object({
-  startTime: z.string().min(1, "Start time is required"),
-  endTime: z.string().optional(),
-  tickets: z
-    .array(ticketSchema)
-    .min(1, "At least one ticket type is required")
-    .superRefine((tickets, ctx) => {
-      const names = new Set<string>()
-      tickets.forEach((ticket, idx) => {
-        const nameKey = ticket.name.trim().toLowerCase()
-        if (names.has(nameKey)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Ticket names must be unique",
-            path: [idx, "name"],
-          })
-        } else if (nameKey) {
-          names.add(nameKey)
-        }
-      })
-    }),
-})
+export const timeSlotSchema = z
+  .object({
+    startTime: z.string().min(1, "Start time is required"),
+    endTime: z.string().optional(),
+    tickets: z
+      .array(ticketSchema)
+      .min(1, "At least one ticket type is required")
+      .superRefine((tickets, ctx) => {
+        const names = new Set<string>()
+        tickets.forEach((ticket, idx) => {
+          const nameKey = ticket.name.trim().toLowerCase()
+          if (names.has(nameKey)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Ticket names must be unique",
+              path: [idx, "name"],
+            })
+          } else if (nameKey) {
+            names.add(nameKey)
+          }
+        })
+      }),
+  })
+  // "HH:mm" strings compare correctly as text
+  .refine((slot) => !slot.endTime || slot.endTime > slot.startTime, {
+    message: "End time must be after start time",
+    path: ["endTime"],
+  })
 
 export const eventDateSchema = z.object({
   date: z.string().min(1, "Date is required"),

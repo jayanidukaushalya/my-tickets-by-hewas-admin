@@ -2,7 +2,7 @@ import { db } from "@/database"
 import { ticket } from "@/database/schema"
 import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
 import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import { z } from "zod"
 
 export const increaseTicketQtyAction = createServerFn({ method: "POST" })
@@ -14,19 +14,16 @@ export const increaseTicketQtyAction = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data }) => {
-    const existingTicket = await db.query.ticket.findFirst({
-      where: eq(ticket.id, data.id),
-      columns: { qty: true },
-    })
+    // Single atomic update so concurrent increases are not lost
+    const updated = await db
+      .update(ticket)
+      .set({ qty: sql`${ticket.qty} + ${data.addQty}` })
+      .where(eq(ticket.id, data.id))
+      .returning({ id: ticket.id })
 
-    if (!existingTicket) {
+    if (updated.length === 0) {
       throw new Error("Ticket not found")
     }
-
-    await db
-      .update(ticket)
-      .set({ qty: existingTicket.qty + data.addQty })
-      .where(eq(ticket.id, data.id))
 
     return { success: true }
   })

@@ -3,7 +3,7 @@ import { customer, order } from "@/database/schema"
 import { apiSuccess, corsPreflightResponse, privateHandler } from "@/server/api"
 import { createFileRoute } from "@tanstack/react-router"
 import { desc, eq } from "drizzle-orm"
-import { format } from "date-fns"
+import { formatInEventTime } from "@/lib/event-time"
 
 export const Route = createFileRoute("/api/tickets/purchase/")({
   server: {
@@ -73,13 +73,16 @@ export const Route = createFileRoute("/api/tickets/purchase/")({
               eventId: event.id,
               eventTitle: event.name,
               eventDate: venueLabel
-                ? `${format(timeSlot.startTime, "EEE, dd MMM | hh:mm a")} | ${venueLabel}`
-                : format(timeSlot.startTime, "EEE, dd MMM | hh:mm a"),
+                ? `${formatInEventTime(timeSlot.startTime, "EEE, dd MMM | hh:mm a")} | ${venueLabel}`
+                : formatInEventTime(
+                    timeSlot.startTime,
+                    "EEE, dd MMM | hh:mm a"
+                  ),
               eventImageUrl: event.image,
               eventLocation: venueLabel,
               userId: currentCustomer.firebaseUid,
               ticketName: p.ticket.name,
-              purchaseDate: format(p.createdAt, "dd MMM yyyy"),
+              purchaseDate: formatInEventTime(p.createdAt, "dd MMM yyyy"),
               qrCode: null,
               status,
               qty: p.qty,

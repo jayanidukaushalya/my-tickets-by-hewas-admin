@@ -1,6 +1,6 @@
 import { Calendar03Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { format } from "date-fns"
+import { format, parseISO } from "date-fns"
 import { useFormContext } from "react-hook-form"
 import type { EventFormValues } from "./schema"
 import { SlotTickets } from "./slot-tickets"
@@ -22,7 +22,7 @@ export function DateTicketsBlock({ dateIndex }: { dateIndex: number }) {
         </div>
         <span className="text-xs font-bold tracking-wider uppercase opacity-60">
           {dateValue
-            ? format(new Date(dateValue), "EEEE, MMMM d, yyyy")
+            ? format(parseISO(dateValue), "EEEE, MMMM d, yyyy")
             : `Date ${dateIndex + 1}`}
         </span>
       </div>

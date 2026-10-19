@@ -25,9 +25,10 @@ export const Route = createFileRoute("/api/events/")({
           limit: getNumberFromParams(searchParams, "limit"),
           field: searchParams.get("field"),
           order: searchParams.get("order"),
-          eventType: searchParams.getAll("eventType").length > 0 
-            ? searchParams.getAll("eventType") 
-            : null,
+          eventType:
+            searchParams.getAll("eventType").length > 0
+              ? searchParams.getAll("eventType")
+              : null,
           scheduleType: searchParams.get("scheduleType"),
           dateFrom: searchParams.get("dateFrom"),
           dateTo: searchParams.get("dateTo"),

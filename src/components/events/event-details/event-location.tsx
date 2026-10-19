@@ -74,7 +74,10 @@ export function EventLocation({ event }: { event: EventType }) {
     <div className="rounded-xl border border-border/40 bg-card/50 p-6 backdrop-blur-xl">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="flex items-center gap-2 font-semibold">
-          <HugeiconsIcon icon={Location01Icon} className="size-5 text-primary" />
+          <HugeiconsIcon
+            icon={Location01Icon}
+            className="size-5 text-primary"
+          />
           Location
         </h3>
         {!isEditingLoc && (

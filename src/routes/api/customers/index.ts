@@ -42,10 +42,7 @@ export const Route = createFileRoute("/api/customers/")({
         })
 
         if (existingByUid) {
-          return apiError(
-            "Customer with this Firebase UID already exists",
-            409
-          )
+          return apiError("Customer with this Firebase UID already exists", 409)
         }
 
         // Check if customer with this email exists

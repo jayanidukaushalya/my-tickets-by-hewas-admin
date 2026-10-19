@@ -13,7 +13,7 @@ import {
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useRouter } from "@tanstack/react-router"
-import { format } from "date-fns"
+import { formatInEventTime } from "@/lib/event-time"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -56,7 +56,7 @@ function TicketIncreaseForm({
       toast.success(`Successfully added ${addQty} more tickets!`)
       form.reset()
       onCancelEditing()
-      
+
       // Background invalidation avoids blocking UI resets
       void router.invalidate()
     } catch {
@@ -87,7 +87,9 @@ function TicketIncreaseForm({
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <span>
               Price:{" "}
-              <span className="font-semibold text-foreground/80">{priceText}</span>
+              <span className="font-semibold text-foreground/80">
+                {priceText}
+              </span>
             </span>
             <span>Available: {availableCount}</span>
           </div>
@@ -175,7 +177,9 @@ function TicketRow({
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <span>
               Price:{" "}
-              <span className="font-semibold text-foreground/80">{priceText}</span>
+              <span className="font-semibold text-foreground/80">
+                {priceText}
+              </span>
             </span>
             <span>Available: {availableCount}</span>
           </div>
@@ -189,7 +193,11 @@ function TicketRow({
             className="gap-1.5"
             onClick={onStartEditing}
           >
-            <HugeiconsIcon icon={Add01Icon} className="size-3" strokeWidth={2} />
+            <HugeiconsIcon
+              icon={Add01Icon}
+              className="size-3"
+              strokeWidth={2}
+            />
             Qty
           </Button>
 
@@ -223,7 +231,11 @@ function NewTicketRow({
     defaultValues: { name: "", price: "", qty: "" },
   })
 
-  const onSubmit = async (data: { name: string; price: string; qty: string }) => {
+  const onSubmit = async (data: {
+    name: string
+    price: string
+    qty: string
+  }) => {
     if (!data.name || !data.qty) return
     try {
       await saveTicketAction({
@@ -319,7 +331,9 @@ function NewTicketRow({
 
 export function EventTickets({ eventDates }: { eventDates: EventDatesType }) {
   const [addingToSlot, setAddingToSlot] = useState<string | null>(null)
-  const [increasingTicketId, setIncreasingTicketId] = useState<string | null>(null)
+  const [increasingTicketId, setIncreasingTicketId] = useState<string | null>(
+    null
+  )
 
   if (!eventDates || eventDates.length === 0) return null
 
@@ -342,7 +356,7 @@ export function EventTickets({ eventDates }: { eventDates: EventDatesType }) {
                 strokeWidth={2}
               />
               {ed.date
-                ? format(new Date(ed.date), "EEEE, MMMM d, yyyy")
+                ? formatInEventTime(ed.date, "EEEE, MMMM d, yyyy")
                 : `Date ${idx + 1}`}
             </div>
             {ed.timeSlots.map((ts) => (
@@ -357,8 +371,8 @@ export function EventTickets({ eventDates }: { eventDates: EventDatesType }) {
                     strokeWidth={2}
                   />
                   {ts.endTime
-                    ? `${format(new Date(ts.startTime), "h:mm a")} — ${format(new Date(ts.endTime), "h:mm a")}`
-                    : `${format(new Date(ts.startTime), "h:mm a")} Onwards`}
+                    ? `${formatInEventTime(ts.startTime, "h:mm a")} — ${formatInEventTime(ts.endTime, "h:mm a")}`
+                    : `${formatInEventTime(ts.startTime, "h:mm a")} Onwards`}
                 </div>
                 <div className="flex flex-col gap-2 pt-1">
                   {ts.tickets.map((t, idx) => (

@@ -9,6 +9,7 @@ import {
   timeSlot,
 } from "@/database/schema"
 import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
+import { eventDateTime, toEventDateKey } from "@/lib/event-time"
 import { createServerFn } from "@tanstack/react-start"
 import { and, count, desc, eq, exists, gte, ilike, lte, or } from "drizzle-orm"
 import { z } from "zod"
@@ -68,12 +69,13 @@ export const getPurchasesFn = createServerFn({ method: "GET" })
     }
 
     if (data?.dateFrom) {
-      conditions.push(gte(orderLine.createdAt, new Date(data.dateFrom)))
+      conditions.push(
+        gte(orderLine.createdAt, eventDateTime(toEventDateKey(data.dateFrom)))
+      )
     }
 
     if (data?.dateTo) {
-      const toDate = new Date(data.dateTo)
-      toDate.setHours(23, 59, 59, 999)
+      const toDate = eventDateTime(toEventDateKey(data.dateTo), "23:59:59.999")
       conditions.push(lte(orderLine.createdAt, toDate))
     }
 

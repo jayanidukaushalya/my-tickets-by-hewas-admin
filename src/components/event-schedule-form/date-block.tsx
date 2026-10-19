@@ -25,7 +25,7 @@ import {
   Clock01Icon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { format } from "date-fns"
+import { format, parseISO } from "date-fns"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import type { EventFormValues } from "./schema"
 
@@ -122,7 +122,7 @@ export function DateBlock({
                         strokeWidth={2}
                       />
                       {field.value ? (
-                        format(new Date(field.value), "PPP")
+                        format(parseISO(field.value), "PPP")
                       ) : (
                         <span>Pick a date</span>
                       )}
@@ -131,9 +131,10 @@ export function DateBlock({
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
+                      selected={field.value ? parseISO(field.value) : undefined}
                       onSelect={(date) =>
-                        field.onChange(date?.toISOString() || "")
+                        // Plain calendar date; the server applies event time
+                        field.onChange(date ? format(date, "yyyy-MM-dd") : "")
                       }
                       disabled={(date) =>
                         date < new Date(new Date().setHours(0, 0, 0, 0))

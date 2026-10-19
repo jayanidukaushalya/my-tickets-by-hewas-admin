@@ -1,7 +1,7 @@
 import { getEventFn } from "@/server/actions/get-event.serverFn"
 import { Calendar01Icon, Clock01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { format } from "date-fns"
+import { formatInEventTime } from "@/lib/event-time"
 
 type EventDatesType = NonNullable<
   Awaited<ReturnType<typeof getEventFn>>
@@ -21,7 +21,7 @@ export function EventDates({ eventDates }: { eventDates: EventDatesType }) {
             className="flex flex-col gap-2 rounded-lg border border-border/20 bg-background/50 p-3"
           >
             <div className="font-medium text-foreground">
-              {format(new Date(ed.date), "EEEE, MMMM do, yyyy")}
+              {formatInEventTime(ed.date, "EEEE, MMMM do, yyyy")}
             </div>
             <div className="flex flex-col gap-1.5 border-l-2 border-primary/20 pl-2">
               {ed.timeSlots.map((ts) => (
@@ -33,8 +33,8 @@ export function EventDates({ eventDates }: { eventDates: EventDatesType }) {
                     <HugeiconsIcon icon={Clock01Icon} className="size-3.5" />
                     <span>
                       {ts.endTime
-                        ? `${format(new Date(ts.startTime), "h:mm a")} — ${format(new Date(ts.endTime), "h:mm a")}`
-                        : `${format(new Date(ts.startTime), "h:mm a")} Onwards`}
+                        ? `${formatInEventTime(ts.startTime, "h:mm a")} — ${formatInEventTime(ts.endTime, "h:mm a")}`
+                        : `${formatInEventTime(ts.startTime, "h:mm a")} Onwards`}
                     </span>
                   </div>
                 </div>

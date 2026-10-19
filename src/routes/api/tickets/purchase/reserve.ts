@@ -17,7 +17,10 @@ import {
   CustomerIdentityConflictError,
   ensureAuthCustomer,
 } from "@/server/api/ensure-auth-customer"
-import { PAYHERE_MERCHANT_ID, PAYHERE_MERCHANT_SECRET } from "@/configs/env.config"
+import {
+  PAYHERE_MERCHANT_ID,
+  PAYHERE_MERCHANT_SECRET,
+} from "@/configs/env.config"
 import { createFileRoute } from "@tanstack/react-router"
 import { and, eq, gt, sql } from "drizzle-orm"
 import { z } from "zod"
@@ -172,7 +175,7 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
               return apiError("Ticket not found", 404)
             }
 
-            const effectiveEndDate = 
+            const effectiveEndDate =
               ticketRecord.timeSlot.endTime ?? ticketRecord.timeSlot.startTime
 
             if (new Date(effectiveEndDate) < new Date()) {

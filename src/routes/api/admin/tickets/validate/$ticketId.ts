@@ -1,7 +1,5 @@
 import { db } from "@/database"
-import {
-  orderLine,
-} from "@/database/schema"
+import { orderLine } from "@/database/schema"
 import {
   apiError,
   apiValidationError,
@@ -11,7 +9,7 @@ import { CORS_HEADERS } from "@/server/api/cors"
 import { adminHandler } from "@/server/api/handler"
 import { createFileRoute } from "@tanstack/react-router"
 import { eq } from "drizzle-orm"
-import { format } from "date-fns"
+import { formatInEventTime } from "@/lib/event-time"
 import { z } from "zod"
 
 const validateParamsSchema = z.object({
@@ -87,8 +85,11 @@ export const Route = createFileRoute("/api/admin/tickets/validate/$ticketId")({
           line.ticket.timeSlot.endTime ?? line.ticket.timeSlot.startTime
         const expired = endDate < now
 
-        const statusBefore =
-          line.isActivated ? "used" : expired ? "expired" : "valid"
+        const statusBefore = line.isActivated
+          ? "used"
+          : expired
+            ? "expired"
+            : "valid"
 
         // Activate after determining the label we want to return.
         if (statusBefore === "valid") {
@@ -100,10 +101,13 @@ export const Route = createFileRoute("/api/admin/tickets/validate/$ticketId")({
 
         const event = line.ticket.timeSlot.eventDate.event
         const eventDateLabel = venueLabel
-          ? `${format(line.ticket.timeSlot.startTime, "EEE, dd MMM | hh:mm a")} | ${venueLabel}`
-          : format(line.ticket.timeSlot.startTime, "EEE, dd MMM | hh:mm a")
+          ? `${formatInEventTime(line.ticket.timeSlot.startTime, "EEE, dd MMM | hh:mm a")} | ${venueLabel}`
+          : formatInEventTime(
+              line.ticket.timeSlot.startTime,
+              "EEE, dd MMM | hh:mm a"
+            )
 
-        const purchaseDate = format(line.createdAt, "dd MMM yyyy")
+        const purchaseDate = formatInEventTime(line.createdAt, "dd MMM yyyy")
 
         return new Response(
           JSON.stringify({
@@ -127,10 +131,9 @@ export const Route = createFileRoute("/api/admin/tickets/validate/$ticketId")({
               "Content-Type": "application/json; charset=utf-8",
               ...CORS_HEADERS,
             },
-          },
+          }
         )
       }),
     },
   },
 })
-

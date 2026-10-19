@@ -4,6 +4,7 @@ import { EventType } from "@/enums/event-type.enum"
 import { ScheduleType } from "@/enums/schedule-type.enum"
 import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
 import { attachSoldQty } from "@/server/ticket-sales"
+import { eventDateTime, toEventDateKey } from "@/lib/event-time"
 import { createServerFn } from "@tanstack/react-start"
 import {
   and,
@@ -52,11 +53,15 @@ export const getEventsFn = createServerFn({ method: "GET" })
     if (data?.dateFrom || data?.dateTo) {
       const dateConditions = [eq(eventDate.eventId, event.id)]
       if (data?.dateFrom) {
-        dateConditions.push(gte(eventDate.date, new Date(data.dateFrom)))
+        dateConditions.push(
+          gte(eventDate.date, eventDateTime(toEventDateKey(data.dateFrom)))
+        )
       }
       if (data?.dateTo) {
-        const toDate = new Date(data.dateTo)
-        toDate.setHours(23, 59, 59, 999)
+        const toDate = eventDateTime(
+          toEventDateKey(data.dateTo),
+          "23:59:59.999"
+        )
         dateConditions.push(lte(eventDate.date, toDate))
       }
       conditions.push(

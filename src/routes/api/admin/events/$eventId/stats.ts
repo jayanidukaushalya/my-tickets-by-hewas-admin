@@ -67,10 +67,7 @@ export const Route = createFileRoute("/api/admin/events/$eventId/stats")({
           .innerJoin(timeSlot, eq(ticket.timeSlotId, timeSlot.id))
           .innerJoin(eventDate, eq(timeSlot.eventDateId, eventDate.id))
           .where(
-            and(
-              eq(eventDate.eventId, eventId),
-              eq(orderLine.isActivated, true)
-            )
+            and(eq(eventDate.eventId, eventId), eq(orderLine.isActivated, true))
           )
 
         return apiSuccess({
