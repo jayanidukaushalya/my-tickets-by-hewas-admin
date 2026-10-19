@@ -1,0 +1,59 @@
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 1024
+
+env:
+  - variable: APP_ENV
+    value: production
+
+  - variable: SITE_URL
+    value: https://REPLACE_WITH_APP_HOSTING_URL
+
+  - variable: DATABASE_URL
+    secret: DATABASE_URL
+  - variable: BETTER_AUTH_SECRET
+    secret: BETTER_AUTH_SECRET
+
+  - variable: FIREBASE_PROJECT_ID
+    value: my-tickets-by-hewas
+
+  - variable: VITE_GOOGLE_MAPS_API_KEY
+    secret: VITE_GOOGLE_MAPS_API_KEY
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: VITE_GOOGLE_MAPS_MAP_ID
+    value: 4a4c6f14d3bae29511af046e
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: CLOUDFLARE_ACCOUNT_ID
+    value: 8631d1f60d391ac7b7c442eeceb17298
+  - variable: CLOUDFLARE_R2_ACCESS_KEY_ID
+    secret: CLOUDFLARE_R2_ACCESS_KEY_ID
+  - variable: CLOUDFLARE_R2_SECRET_ACCESS_KEY
+    secret: CLOUDFLARE_R2_SECRET_ACCESS_KEY
+  - variable: CLOUDFLARE_R2_BUCKET_NAME
+    value: my-tickets-by-hewas
+  - variable: CLOUDFLARE_R2_PUBLIC_URL
+    value: https://images.jayanidukaushalya.com
+
+  - variable: PAYHERE_MERCHANT_ID
+    value: "1226554"
+  - variable: PAYHERE_MERCHANT_SECRET
+    secret: PAYHERE_MERCHANT_SECRET
+  - variable: PAYHERE_APP_ID
+    secret: PAYHERE_APP_ID
+  - variable: PAYHERE_APP_SECRET
+    secret: PAYHERE_APP_SECRET
+  - variable: PAYHERE_SANDBOX
+    value: "true"
+
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
+  - variable: RESEND_FROM_EMAIL
+    value: My Tickets by Hewas <noreply@dev.jayanidukaushalya.com>

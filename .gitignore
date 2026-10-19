@@ -13,3 +13,5 @@ count.txt
 __unconfig*
 todos.json
 src/integrations/firebase/*.json
+
+.firebase
