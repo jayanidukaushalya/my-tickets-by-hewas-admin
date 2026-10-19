@@ -10,9 +10,11 @@ import {
 import { EventType } from "@/enums/event-type.enum"
 import { ScheduleType } from "@/enums/schedule-type.enum"
 import { uploadImage } from "@/integrations/cloudflare-r2/image"
+import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
 import { createServerFn } from "@tanstack/react-start"
 
 export const createEventAction = createServerFn({ method: "POST" })
+  .middleware([adminFnMiddleware])
   .inputValidator((formData: FormData) => {
     const payloadStr = formData.get("payload")
     if (typeof payloadStr !== "string") {
@@ -89,10 +91,13 @@ export const createEventAction = createServerFn({ method: "POST" })
 
         // Construct full Date objects for startTime and endTime incorporating the ed.date
         const baseDateStr = new Date(ed.date).toISOString().split("T")[0]
-        
-        const formatTime = (t: string) => t.split(":").length === 2 ? `${t}:00` : t
 
-        const startDatePos = new Date(`${baseDateStr}T${formatTime(ts.startTime)}`)
+        const formatTime = (t: string) =>
+          t.split(":").length === 2 ? `${t}:00` : t
+
+        const startDatePos = new Date(
+          `${baseDateStr}T${formatTime(ts.startTime)}`
+        )
         let endDatePos = null
         if (ts.endTime) {
           endDatePos = new Date(`${baseDateStr}T${formatTime(ts.endTime)}`)

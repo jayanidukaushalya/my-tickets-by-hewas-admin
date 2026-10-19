@@ -151,10 +151,6 @@ function LoginComponent() {
             </form>
           </CardContent>
         </Card>
-
-        <p className="text-[10px] font-bold tracking-[0.2em] text-muted-foreground uppercase opacity-50">
-          Authorized Personnel Only
-        </p>
       </div>
     </div>
   )

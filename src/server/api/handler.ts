@@ -1,6 +1,7 @@
 import type { DecodedIdToken } from "firebase-admin/auth"
 import { verifyFirebaseToken } from "./auth"
 import { apiError } from "./response"
+import { auth } from "@/integrations/better-auth/auth"
 
 // ---------------------------------------------------------------------------
 // Handler context types
@@ -19,6 +20,14 @@ export type AuthenticatedApiHandlerContext = ApiHandlerContext & {
 export type OptionallyAuthenticatedApiHandlerContext = ApiHandlerContext & {
   /** Decoded Firebase ID token if provided — undefined for guest users */
   user?: DecodedIdToken
+}
+
+export type AdminAuthenticatedApiHandlerContext = ApiHandlerContext & {
+  /**
+   * Better Auth session returned by `auth.api.getSession()` (Bearer or cookie
+   * based depending on the configured plugins).
+   */
+  adminSession: NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>
 }
 
 // ---------------------------------------------------------------------------
@@ -116,6 +125,36 @@ export function privateHandler(
       return await fn({ ...ctx, user: result })
     } catch (e) {
       console.error("[API] Unhandled error in private handler:", e)
+      return apiError("Internal server error", 500)
+    }
+  }
+}
+
+/**
+ * Wraps a handler for an **admin/private** endpoint using Better Auth.
+ *
+ * Expected auth input:
+ * - `Authorization: Bearer <token>` (requires Better Auth `bearer()` plugin)
+ *
+ * If the session is missing/expired/invalid, responds with `401 Unauthorized`.
+ */
+export function adminHandler(
+  fn: Handler<AdminAuthenticatedApiHandlerContext>
+): Handler<ApiHandlerContext> {
+  return async (ctx) => {
+    logApiRequest(ctx.request)
+    try {
+      const session = await auth.api.getSession({
+        headers: ctx.request.headers,
+      })
+
+      if (!session) {
+        return apiError("Unauthorized", 401)
+      }
+
+      return await fn({ ...ctx, adminSession: session })
+    } catch (e) {
+      console.error("[API] Unhandled error in admin handler:", e)
       return apiError("Internal server error", 500)
     }
   }

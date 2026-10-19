@@ -6,5 +6,6 @@ export enum EventType {
   EXHIBITION = "exhibition",
   SEMINAR = "seminar",
   SPORT = "sport",
+  TRAVEL = "travel",
   OTHER = "other",
 }

@@ -18,7 +18,7 @@ export function EventCard({ event }: { event: EventData }) {
   // Safely extract main date
   const mainDate = event.eventDates?.[0]?.date
   const venue = event.location?.venue ?? "TBD"
-  
+
   // Calculate total tickets available
   const totalQty =
     event.eventDates?.reduce(
@@ -26,7 +26,8 @@ export function EventCard({ event }: { event: EventData }) {
         acc +
         (dt.timeSlots?.reduce(
           (accTs, ts) =>
-            accTs + (ts.tickets?.reduce((accT, t) => accT + (t.qty || 0), 0) || 0),
+            accTs +
+            (ts.tickets?.reduce((accT, t) => accT + (t.qty || 0), 0) || 0),
           0
         ) || 0),
       0
@@ -39,23 +40,14 @@ export function EventCard({ event }: { event: EventData }) {
         acc +
         (dt.timeSlots?.reduce(
           (accTs, ts) =>
-            accTs +
-            (ts.tickets?.reduce(
-              (accT, t) =>
-                accT +
-                (t.orderLines?.reduce(
-                  (accP, p: { qty: number }) => accP + (p.qty || 0),
-                  0
-                ) || 0),
-              0
-            ) || 0),
+            accTs + (ts.tickets?.reduce((accT, t) => accT + t.soldQty, 0) || 0),
           0
         ) || 0),
       0
     ) || 0
 
   const isSoldOut = totalQty > 0 && totalSold >= totalQty
-  
+
   // Count total dates
   const totalDates = event.eventDates?.length || 0
 
@@ -71,7 +63,7 @@ export function EventCard({ event }: { event: EventData }) {
           {formatEnum(event.eventType)}
         </div>
         {isSoldOut && (
-          <div className="absolute right-3 top-3 rounded-full bg-destructive/90 px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase text-destructive-foreground shadow-sm backdrop-blur-md">
+          <div className="text-destructive-foreground absolute top-3 right-3 rounded-full bg-destructive/90 px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase shadow-sm backdrop-blur-md">
             Sold Out
           </div>
         )}

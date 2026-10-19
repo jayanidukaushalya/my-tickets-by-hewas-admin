@@ -12,6 +12,7 @@ import { Add01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
+  debounce,
   parseAsInteger,
   parseAsString,
   parseAsStringEnum,
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/_dashboard/events/")({
           search: deps.search,
           field: deps.field,
           order: deps.order,
-          eventType: deps.eventType,
+          eventType: deps.eventType ? [deps.eventType] : undefined,
           scheduleType: deps.scheduleType,
           dateFrom: deps.dateFrom,
           dateTo: deps.dateTo,
@@ -91,7 +92,7 @@ function EventsComponent() {
   return (
     <>
       <DashboardHeader />
-      <main className="relative flex-1 overflow-y-auto p-6">
+      <main className="relative flex flex-1 flex-col overflow-y-auto p-6">
         {/* Background decoration */}
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute top-[10%] left-[15%] h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
@@ -107,7 +108,11 @@ function EventsComponent() {
               Manage and monitor all your ticketed events
             </p>
           </div>
-          <Button asChild size="lg" className="h-12 text-xs font-bold tracking-widest uppercase shadow-lg shadow-primary/20 transition-all active:scale-95">
+          <Button
+            asChild
+            size="lg"
+            className="h-12 text-xs font-bold tracking-widest uppercase shadow-lg shadow-primary/20 transition-all active:scale-95"
+          >
             <Link to="/events/schedule">
               <HugeiconsIcon
                 icon={Add01Icon}
@@ -126,7 +131,12 @@ function EventsComponent() {
           scheduleType={scheduleType}
           dateFrom={dateFrom}
           dateTo={dateTo}
-          onSearchChange={(val) => setQueryStates({ search: val, page: 1 })}
+          onSearchChange={(val) =>
+            setQueryStates(
+              { search: val, page: 1 },
+              { limitUrlUpdates: debounce(300) }
+            )
+          }
           onEventTypeChange={(val) =>
             setQueryStates({ eventType: val, page: 1 })
           }
@@ -145,19 +155,22 @@ function EventsComponent() {
         {results.length === 0 ? (
           <EmptyEventState hasFilters={hasFilters} />
         ) : (
-          <div className="space-y-8">
+          <div className="flex flex-1 flex-col gap-8">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {results.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
 
-            <PaginationControls
-              page={page}
-              total={total}
-              limit={limit}
-              setPage={(p) => setQueryStates({ page: p })}
-            />
+            {/* Pinned to the bottom when content is short, otherwise follows the grid */}
+            <div className="mt-auto">
+              <PaginationControls
+                page={page}
+                total={total}
+                limit={limit}
+                setPage={(p) => setQueryStates({ page: p })}
+              />
+            </div>
           </div>
         )}
       </main>

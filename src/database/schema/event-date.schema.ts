@@ -1,23 +1,27 @@
 import { relations } from "drizzle-orm"
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import { ulid } from "ulid"
 import { event } from "./event.schema"
 import { timeSlot } from "./time-slot.schema"
 
-export const eventDate = pgTable("event_date", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => ulid()),
-  eventId: text("event_id")
-    .notNull()
-    .references(() => event.id, { onDelete: "cascade" }),
-  date: timestamp("event_date").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-})
+export const eventDate = pgTable(
+  "event_date",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => ulid()),
+    eventId: text("event_id")
+      .notNull()
+      .references(() => event.id, { onDelete: "cascade" }),
+    date: timestamp("event_date").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("event_date_event_id_idx").on(table.eventId)]
+)
 
 export const eventDateRelations = relations(eventDate, ({ one, many }) => ({
   event: one(event, {

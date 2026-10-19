@@ -1,3 +1,4 @@
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,6 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { authClient } from "@/integrations/better-auth/auth-client"
 import { Link, useLocation } from "@tanstack/react-router"
 import React from "react"
 
@@ -23,6 +25,7 @@ export function DashboardHeader({
   breadcrumbs: customBreadcrumbs,
 }: DashboardHeaderProps) {
   const { pathname } = useLocation()
+  const { data: session } = authClient.useSession()
   const pathSegments = pathname.split("/").filter(Boolean)
 
   const items = customBreadcrumbs || [
@@ -58,6 +61,22 @@ export function DashboardHeader({
           ))}
         </BreadcrumbList>
       </Breadcrumb>
+
+      <div className="ml-auto flex items-center gap-3">
+        <Avatar className="size-9 overflow-hidden rounded-full border border-border/40 shadow-inner">
+          <AvatarFallback className="rounded-full bg-primary/10 font-bold text-primary">
+            {session?.user.name?.charAt(0)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="hidden text-sm leading-tight sm:grid">
+          <span className="truncate font-semibold text-foreground">
+            {session?.user.name}
+          </span>
+          <span className="truncate text-xs text-muted-foreground opacity-70">
+            {session?.user.email}
+          </span>
+        </div>
+      </div>
     </header>
   )
 }

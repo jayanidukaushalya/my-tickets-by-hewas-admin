@@ -1,7 +1,9 @@
 import { db } from "@/database"
-import { event, eventDate, timeSlot } from "@/database/schema"
+import { event, eventDate } from "@/database/schema"
 import { EventType } from "@/enums/event-type.enum"
 import { ScheduleType } from "@/enums/schedule-type.enum"
+import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
+import { attachSoldQty } from "@/server/ticket-sales"
 import { createServerFn } from "@tanstack/react-start"
 import {
   and,
@@ -14,7 +16,6 @@ import {
   ilike,
   inArray,
   lte,
-  sql,
 } from "drizzle-orm"
 import { z } from "zod"
 
@@ -31,24 +32,10 @@ export const getEventsValidator = z.object({
 })
 
 export const getEventsFn = createServerFn({ method: "GET" })
+  .middleware([adminFnMiddleware])
   .inputValidator(getEventsValidator)
   .handler(async ({ data }) => {
     const conditions = []
-
-    conditions.push(
-      exists(
-        db
-          .select({ id: timeSlot.id })
-          .from(timeSlot)
-          .innerJoin(eventDate, eq(timeSlot.eventDateId, eventDate.id))
-          .where(
-            and(
-              eq(eventDate.eventId, event.id),
-              gte(sql`coalesce(${timeSlot.endTime}, ${timeSlot.startTime})`, new Date())
-            )
-          )
-      )
-    )
 
     if (data?.search) {
       conditions.push(ilike(event.name, `%${data.search}%`))
@@ -101,39 +88,34 @@ export const getEventsFn = createServerFn({ method: "GET" })
     const limit = data?.limit || 8
     const offset = data?.page ? (data.page - 1) * limit : 0
 
-    const results = await db.query.event.findMany({
-      where,
-      orderBy: orderByClause,
-      limit,
-      offset,
-      with: {
-        eventDates: {
-          with: {
-            timeSlots: {
-              with: {
-                tickets: {
-                  with: {
-                    orderLines: {
-                      columns: {
-                        qty: true,
-                      },
-                    },
-                  },
+    const [events, [{ count: total }]] = await Promise.all([
+      db.query.event.findMany({
+        where,
+        orderBy: orderByClause,
+        limit,
+        offset,
+        with: {
+          eventDates: {
+            with: {
+              timeSlots: {
+                with: {
+                  tickets: true,
                 },
               },
             },
           },
+          location: true,
         },
-        location: true,
-      },
-    })
+      }),
+      db
+        .select({
+          count: count(),
+        })
+        .from(event)
+        .where(where),
+    ])
 
-    const [{ count: total }] = await db
-      .select({
-        count: count(),
-      })
-      .from(event)
-      .where(where)
+    const results = await attachSoldQty(events)
 
     return {
       results,

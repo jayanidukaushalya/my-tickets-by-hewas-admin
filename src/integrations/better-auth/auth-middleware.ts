@@ -22,6 +22,27 @@ export const authMiddleware = createMiddleware().server(async ({ next }) => {
 })
 
 /**
+ * Middleware to protect admin server functions. Route middleware only guards
+ * document requests, so every server function must use this as well.
+ */
+export const adminFnMiddleware = createMiddleware({ type: "function" }).server(
+  async ({ next }) => {
+    const headers = getRequestHeaders()
+    const session = await auth.api.getSession({ headers })
+
+    if (!session) {
+      throw redirect({ to: "/login" })
+    }
+
+    return await next({
+      context: {
+        admin: session.user,
+      },
+    })
+  }
+)
+
+/**
  * Middleware to redirect authenticated users away from login page
  */
 export const redirectIfAuthenticated = createMiddleware().server(

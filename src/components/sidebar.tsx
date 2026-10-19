@@ -1,13 +1,4 @@
 import { LogoutConfirmDialog } from "@/components/logout-confirm-dialog"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Sidebar,
   SidebarContent,
@@ -26,24 +17,14 @@ import {
   Calendar01Icon,
   DashboardSquare01Icon,
   Logout01Icon,
-  Settings02Icon,
   ShoppingBag01Icon,
-  UnfoldMoreIcon,
   UserGroupIcon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Link, useLocation, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 
-interface SidebarSession {
-  user: {
-    name?: string | null
-    email?: string | null
-    image?: string | null
-  }
-}
-
-export function AppSidebar({ session }: { session: SidebarSession | null }) {
+export function AppSidebar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -155,60 +136,21 @@ export function AppSidebar({ session }: { session: SidebarSession | null }) {
         <SidebarFooter className="border-t border-dashed">
           <SidebarMenu>
             <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton
-                    size="lg"
-                    className="rounded-full transition-all duration-200 hover:bg-sidebar-accent data-[state=open]:bg-sidebar-accent"
-                  >
-                    <Avatar className="size-8 overflow-hidden rounded-full border border-border/40 shadow-inner">
-                      <AvatarFallback className="rounded-full bg-primary/10 font-bold text-primary">
-                        {session?.user.name?.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                      <span className="truncate font-semibold text-foreground">
-                        {session?.user.name}
-                      </span>
-                      <span className="truncate text-[10px] text-muted-foreground opacity-70">
-                        {session?.user.email}
-                      </span>
-                    </div>
-                    <HugeiconsIcon
-                      icon={UnfoldMoreIcon}
-                      className="size-4 opacity-50 transition-transform duration-200 group-data-[collapsible=icon]:hidden"
-                      strokeWidth={2}
-                    />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-xl p-2 shadow-2xl"
-                  side="bottom"
-                  align="end"
-                  sideOffset={8}
-                >
-                  <DropdownMenuLabel className="px-2 py-1.5 text-xs font-semibold tracking-widest text-muted-foreground uppercase opacity-50">
-                    Account Activity
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-border/40" />
-                  <DropdownMenuItem className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent">
-                    <HugeiconsIcon icon={Settings02Icon} className="size-4" />
-                    <span>User Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-border/40" />
-                  <DropdownMenuItem
-                    variant="destructive"
-                    className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors focus:bg-destructive/10"
-                    onSelect={(e) => {
-                      e.preventDefault()
-                      setShowLogoutDialog(true)
-                    }}
-                  >
-                    <HugeiconsIcon icon={Logout01Icon} className="size-4" />
-                    <span>Log Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <SidebarMenuButton
+                size="lg"
+                tooltip="Log Out"
+                onClick={() => setShowLogoutDialog(true)}
+                className="rounded-xl text-destructive transition-all duration-200 group-data-[collapsible=icon]:justify-center hover:bg-destructive/10 hover:text-destructive"
+              >
+                <HugeiconsIcon
+                  icon={Logout01Icon}
+                  className="size-5 shrink-0"
+                  strokeWidth={2}
+                />
+                <span className="font-semibold group-data-[collapsible=icon]:hidden">
+                  Log Out
+                </span>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>

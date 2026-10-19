@@ -1,17 +1,21 @@
 import { db } from "@/database"
 import { ticket } from "@/database/schema"
+import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
 export const saveTicketAction = createServerFn({ method: "POST" })
-  .inputValidator(z.object({
-    id: z.string().optional(),
-    timeSlotId: z.string(),
-    name: z.string().min(1, "Name is required"),
-    price: z.string(),
-    qty: z.number().int().min(1, "Quantity must be at least 1"),
-  }))
+  .middleware([adminFnMiddleware])
+  .inputValidator(
+    z.object({
+      id: z.string().optional(),
+      timeSlotId: z.string(),
+      name: z.string().min(1, "Name is required"),
+      price: z.string(),
+      qty: z.number().int().min(1, "Quantity must be at least 1"),
+    })
+  )
   .handler(async ({ data }) => {
     if (data.id) {
       await db

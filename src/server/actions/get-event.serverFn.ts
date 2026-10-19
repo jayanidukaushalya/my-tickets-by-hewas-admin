@@ -1,10 +1,13 @@
 import { db } from "@/database"
 import { event } from "@/database/schema"
+import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
+import { attachSoldQty } from "@/server/ticket-sales"
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
 export const getEventFn = createServerFn({ method: "GET" })
+  .middleware([adminFnMiddleware])
   .inputValidator(z.object({ eventId: z.string() }))
   .handler(async ({ data }) => {
     const eventResult = await db.query.event.findFirst({
@@ -14,15 +17,7 @@ export const getEventFn = createServerFn({ method: "GET" })
           with: {
             timeSlots: {
               with: {
-                tickets: {
-                  with: {
-                    orderLines: {
-                      columns: {
-                        qty: true,
-                      },
-                    },
-                  },
-                },
+                tickets: true,
               },
             },
           },
@@ -35,5 +30,6 @@ export const getEventFn = createServerFn({ method: "GET" })
       throw new Error("Event not found")
     }
 
-    return eventResult
+    const [result] = await attachSoldQty([eventResult])
+    return result
   })

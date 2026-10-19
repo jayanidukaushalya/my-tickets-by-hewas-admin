@@ -1,6 +1,7 @@
 import { db } from "@/database"
 import { event, location as locationTable } from "@/database/schema"
 import { uploadImage } from "@/integrations/cloudflare-r2/image"
+import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm"
 import { z } from "zod/v3"
@@ -16,6 +17,7 @@ const updateEventPartialSchema = z.object({
 })
 
 export const updateEventAction = createServerFn({ method: "POST" })
+  .middleware([adminFnMiddleware])
   .inputValidator((formData: FormData) => {
     const payloadStr = formData.get("payload")
     if (typeof payloadStr !== "string") {
@@ -58,10 +60,7 @@ export const updateEventAction = createServerFn({ method: "POST" })
     }
 
     if (Object.keys(eventUpdates).length > 0) {
-      await db
-        .update(event)
-        .set(eventUpdates)
-        .where(eq(event.id, data.eventId))
+      await db.update(event).set(eventUpdates).where(eq(event.id, data.eventId))
     }
 
     // Update location

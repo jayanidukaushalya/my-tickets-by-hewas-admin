@@ -1,10 +1,12 @@
 import { db } from "@/database"
 import { ticket } from "@/database/schema"
+import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
 export const increaseTicketQtyAction = createServerFn({ method: "POST" })
+  .middleware([adminFnMiddleware])
   .inputValidator(
     z.object({
       id: z.string(),

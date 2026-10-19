@@ -16,6 +16,7 @@ import { Route as ApiEventsIndexRouteImport } from './routes/api/events/index'
 import { Route as ApiCustomersIndexRouteImport } from './routes/api/customers/index'
 import { Route as DashboardPurchasesIndexRouteImport } from './routes/_dashboard.purchases.index'
 import { Route as DashboardEventsIndexRouteImport } from './routes/_dashboard.events.index'
+import { Route as DashboardCustomersIndexRouteImport } from './routes/_dashboard.customers.index'
 import { Route as ApiEventsEventIdRouteImport } from './routes/api/events/$eventId'
 import { Route as ApiCustomersMeRouteImport } from './routes/api/customers/me'
 import { Route as ApiCustomersLinkRouteImport } from './routes/api/customers/link'
@@ -25,6 +26,8 @@ import { Route as DashboardEventsEventIdRouteImport } from './routes/_dashboard.
 import { Route as ApiTicketsPurchaseIndexRouteImport } from './routes/api/tickets/purchase/index'
 import { Route as ApiTicketsPurchaseReserveRouteImport } from './routes/api/tickets/purchase/reserve'
 import { Route as ApiTicketsPurchaseConfirmRouteImport } from './routes/api/tickets/purchase/confirm'
+import { Route as ApiAdminTicketsValidateTicketIdRouteImport } from './routes/api/admin/tickets/validate/$ticketId'
+import { Route as ApiAdminEventsEventIdStatsRouteImport } from './routes/api/admin/events/$eventId/stats'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -58,6 +61,11 @@ const DashboardPurchasesIndexRoute = DashboardPurchasesIndexRouteImport.update({
 const DashboardEventsIndexRoute = DashboardEventsIndexRouteImport.update({
   id: '/events/',
   path: '/events/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCustomersIndexRoute = DashboardCustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
   getParentRoute: () => DashboardRoute,
 } as any)
 const ApiEventsEventIdRoute = ApiEventsEventIdRouteImport.update({
@@ -107,6 +115,18 @@ const ApiTicketsPurchaseConfirmRoute =
     path: '/api/tickets/purchase/confirm',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAdminTicketsValidateTicketIdRoute =
+  ApiAdminTicketsValidateTicketIdRouteImport.update({
+    id: '/api/admin/tickets/validate/$ticketId',
+    path: '/api/admin/tickets/validate/$ticketId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminEventsEventIdStatsRoute =
+  ApiAdminEventsEventIdStatsRouteImport.update({
+    id: '/api/admin/events/$eventId/stats',
+    path: '/api/admin/events/$eventId/stats',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof DashboardIndexRoute
@@ -117,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/api/customers/link': typeof ApiCustomersLinkRoute
   '/api/customers/me': typeof ApiCustomersMeRoute
   '/api/events/$eventId': typeof ApiEventsEventIdRoute
+  '/customers/': typeof DashboardCustomersIndexRoute
   '/events/': typeof DashboardEventsIndexRoute
   '/purchases/': typeof DashboardPurchasesIndexRoute
   '/api/customers/': typeof ApiCustomersIndexRoute
@@ -124,6 +145,8 @@ export interface FileRoutesByFullPath {
   '/api/tickets/purchase/confirm': typeof ApiTicketsPurchaseConfirmRoute
   '/api/tickets/purchase/reserve': typeof ApiTicketsPurchaseReserveRoute
   '/api/tickets/purchase/': typeof ApiTicketsPurchaseIndexRoute
+  '/api/admin/events/$eventId/stats': typeof ApiAdminEventsEventIdStatsRoute
+  '/api/admin/tickets/validate/$ticketId': typeof ApiAdminTicketsValidateTicketIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -134,6 +157,7 @@ export interface FileRoutesByTo {
   '/api/customers/link': typeof ApiCustomersLinkRoute
   '/api/customers/me': typeof ApiCustomersMeRoute
   '/api/events/$eventId': typeof ApiEventsEventIdRoute
+  '/customers': typeof DashboardCustomersIndexRoute
   '/events': typeof DashboardEventsIndexRoute
   '/purchases': typeof DashboardPurchasesIndexRoute
   '/api/customers': typeof ApiCustomersIndexRoute
@@ -141,6 +165,8 @@ export interface FileRoutesByTo {
   '/api/tickets/purchase/confirm': typeof ApiTicketsPurchaseConfirmRoute
   '/api/tickets/purchase/reserve': typeof ApiTicketsPurchaseReserveRoute
   '/api/tickets/purchase': typeof ApiTicketsPurchaseIndexRoute
+  '/api/admin/events/$eventId/stats': typeof ApiAdminEventsEventIdStatsRoute
+  '/api/admin/tickets/validate/$ticketId': typeof ApiAdminTicketsValidateTicketIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -153,6 +179,7 @@ export interface FileRoutesById {
   '/api/customers/link': typeof ApiCustomersLinkRoute
   '/api/customers/me': typeof ApiCustomersMeRoute
   '/api/events/$eventId': typeof ApiEventsEventIdRoute
+  '/_dashboard/customers/': typeof DashboardCustomersIndexRoute
   '/_dashboard/events/': typeof DashboardEventsIndexRoute
   '/_dashboard/purchases/': typeof DashboardPurchasesIndexRoute
   '/api/customers/': typeof ApiCustomersIndexRoute
@@ -160,6 +187,8 @@ export interface FileRoutesById {
   '/api/tickets/purchase/confirm': typeof ApiTicketsPurchaseConfirmRoute
   '/api/tickets/purchase/reserve': typeof ApiTicketsPurchaseReserveRoute
   '/api/tickets/purchase/': typeof ApiTicketsPurchaseIndexRoute
+  '/api/admin/events/$eventId/stats': typeof ApiAdminEventsEventIdStatsRoute
+  '/api/admin/tickets/validate/$ticketId': typeof ApiAdminTicketsValidateTicketIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -172,6 +201,7 @@ export interface FileRouteTypes {
     | '/api/customers/link'
     | '/api/customers/me'
     | '/api/events/$eventId'
+    | '/customers/'
     | '/events/'
     | '/purchases/'
     | '/api/customers/'
@@ -179,6 +209,8 @@ export interface FileRouteTypes {
     | '/api/tickets/purchase/confirm'
     | '/api/tickets/purchase/reserve'
     | '/api/tickets/purchase/'
+    | '/api/admin/events/$eventId/stats'
+    | '/api/admin/tickets/validate/$ticketId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -189,6 +221,7 @@ export interface FileRouteTypes {
     | '/api/customers/link'
     | '/api/customers/me'
     | '/api/events/$eventId'
+    | '/customers'
     | '/events'
     | '/purchases'
     | '/api/customers'
@@ -196,6 +229,8 @@ export interface FileRouteTypes {
     | '/api/tickets/purchase/confirm'
     | '/api/tickets/purchase/reserve'
     | '/api/tickets/purchase'
+    | '/api/admin/events/$eventId/stats'
+    | '/api/admin/tickets/validate/$ticketId'
   id:
     | '__root__'
     | '/_dashboard'
@@ -207,6 +242,7 @@ export interface FileRouteTypes {
     | '/api/customers/link'
     | '/api/customers/me'
     | '/api/events/$eventId'
+    | '/_dashboard/customers/'
     | '/_dashboard/events/'
     | '/_dashboard/purchases/'
     | '/api/customers/'
@@ -214,6 +250,8 @@ export interface FileRouteTypes {
     | '/api/tickets/purchase/confirm'
     | '/api/tickets/purchase/reserve'
     | '/api/tickets/purchase/'
+    | '/api/admin/events/$eventId/stats'
+    | '/api/admin/tickets/validate/$ticketId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -228,6 +266,8 @@ export interface RootRouteChildren {
   ApiTicketsPurchaseConfirmRoute: typeof ApiTicketsPurchaseConfirmRoute
   ApiTicketsPurchaseReserveRoute: typeof ApiTicketsPurchaseReserveRoute
   ApiTicketsPurchaseIndexRoute: typeof ApiTicketsPurchaseIndexRoute
+  ApiAdminEventsEventIdStatsRoute: typeof ApiAdminEventsEventIdStatsRoute
+  ApiAdminTicketsValidateTicketIdRoute: typeof ApiAdminTicketsValidateTicketIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -279,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/events'
       fullPath: '/events/'
       preLoaderRoute: typeof DashboardEventsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/customers/': {
+      id: '/_dashboard/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof DashboardCustomersIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/api/events/$eventId': {
@@ -344,6 +391,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTicketsPurchaseConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/tickets/validate/$ticketId': {
+      id: '/api/admin/tickets/validate/$ticketId'
+      path: '/api/admin/tickets/validate/$ticketId'
+      fullPath: '/api/admin/tickets/validate/$ticketId'
+      preLoaderRoute: typeof ApiAdminTicketsValidateTicketIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/events/$eventId/stats': {
+      id: '/api/admin/events/$eventId/stats'
+      path: '/api/admin/events/$eventId/stats'
+      fullPath: '/api/admin/events/$eventId/stats'
+      preLoaderRoute: typeof ApiAdminEventsEventIdStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -351,6 +412,7 @@ interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardEventsEventIdRoute: typeof DashboardEventsEventIdRoute
   DashboardEventsScheduleRoute: typeof DashboardEventsScheduleRoute
+  DashboardCustomersIndexRoute: typeof DashboardCustomersIndexRoute
   DashboardEventsIndexRoute: typeof DashboardEventsIndexRoute
   DashboardPurchasesIndexRoute: typeof DashboardPurchasesIndexRoute
 }
@@ -359,6 +421,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardEventsEventIdRoute: DashboardEventsEventIdRoute,
   DashboardEventsScheduleRoute: DashboardEventsScheduleRoute,
+  DashboardCustomersIndexRoute: DashboardCustomersIndexRoute,
   DashboardEventsIndexRoute: DashboardEventsIndexRoute,
   DashboardPurchasesIndexRoute: DashboardPurchasesIndexRoute,
 }
@@ -379,6 +442,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTicketsPurchaseConfirmRoute: ApiTicketsPurchaseConfirmRoute,
   ApiTicketsPurchaseReserveRoute: ApiTicketsPurchaseReserveRoute,
   ApiTicketsPurchaseIndexRoute: ApiTicketsPurchaseIndexRoute,
+  ApiAdminEventsEventIdStatsRoute: ApiAdminEventsEventIdStatsRoute,
+  ApiAdminTicketsValidateTicketIdRoute: ApiAdminTicketsValidateTicketIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

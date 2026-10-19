@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm"
 import {
   boolean,
+  index,
   integer,
   numeric,
   pgTable,
@@ -15,45 +16,57 @@ import { ticket } from "./ticket.schema"
  * Paid order header (one payment / checkout completion).
  * Table name `orders` avoids SQL reserved word `order`.
  */
-export const order = pgTable("orders", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => ulid()),
-  customerId: text("customer_id")
-    .notNull()
-    .references(() => customer.id),
-  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
-  currency: text("currency").notNull().default("LKR"),
-  payhereOrderId: text("payhere_order_id"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-})
+export const order = pgTable(
+  "orders",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => ulid()),
+    customerId: text("customer_id")
+      .notNull()
+      .references(() => customer.id),
+    totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+    currency: text("currency").notNull().default("LKR"),
+    payhereOrderId: text("payhere_order_id"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("orders_customer_id_idx").on(table.customerId)]
+)
 
 /**
  * Paid line items (ticket type + qty + unit price snapshot).
  */
-export const orderLine = pgTable("order_line", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => ulid()),
-  orderId: text("order_id")
-    .notNull()
-    .references(() => order.id, { onDelete: "cascade" }),
-  ticketId: text("ticket_id")
-    .notNull()
-    .references(() => ticket.id),
-  qty: integer("qty").notNull(),
-  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-  isActivated: boolean("is_activated").default(false).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-})
+export const orderLine = pgTable(
+  "order_line",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => ulid()),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => order.id, { onDelete: "cascade" }),
+    ticketId: text("ticket_id")
+      .notNull()
+      .references(() => ticket.id),
+    qty: integer("qty").notNull(),
+    price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+    isActivated: boolean("is_activated").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("order_line_order_id_idx").on(table.orderId),
+    index("order_line_ticket_id_idx").on(table.ticketId),
+    index("order_line_created_at_idx").on(table.createdAt),
+  ]
+)
 
 export const orderRelations = relations(order, ({ one, many }) => ({
   customer: one(customer, {
