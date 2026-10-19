@@ -1,9 +1,9 @@
 import { DashboardHeader } from "@/components/dashboard-header"
 import { PurchaseFilters } from "@/components/purchases/purchase-filters"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { PaginationControls } from "@/components/ui/pagination-controls"
 import { formatCurrency } from "@/lib/utils"
+import { getEventOptionsFn } from "@/server/actions/get-event-options.serverFn"
 import { getPurchasesFn } from "@/server/actions/get-purchases.serverFn"
 import {
   Calendar01Icon,
@@ -50,6 +50,7 @@ export const Route = createFileRoute("/_dashboard/purchases/")({
     isActivated: search.isActivated ?? undefined,
   }),
   loader: async ({ deps }) => {
+    const eventOptions = getEventOptionsFn().catch(() => [])
     try {
       const data = await getPurchasesFn({
         data: {
@@ -62,17 +63,20 @@ export const Route = createFileRoute("/_dashboard/purchases/")({
           isActivated: deps.isActivated,
         },
       })
-      return { data }
+      return { data, eventOptions: await eventOptions }
     } catch (error) {
       console.error("Failed to load purchases:", error)
-      return { data: { results: [], total: 0 } }
+      return {
+        data: { results: [], total: 0 },
+        eventOptions: await eventOptions,
+      }
     }
   },
   component: PurchasesComponent,
 })
 
 function PurchasesComponent() {
-  const { data } = Route.useLoaderData()
+  const { data, eventOptions } = Route.useLoaderData()
   const { results = [], total = 0 } = data ?? {}
 
   const [queryStates, setQueryStates] = useQueryStates(searchParams, {
@@ -81,9 +85,6 @@ function PurchasesComponent() {
 
   const { search, page, limit, dateFrom, dateTo, isActivated, eventId } =
     queryStates
-  const filteredEventName = eventId
-    ? results[0]?.ticket.timeSlot.eventDate.event.name
-    : undefined
 
   return (
     <>
@@ -110,6 +111,8 @@ function PurchasesComponent() {
           dateFrom={dateFrom}
           dateTo={dateTo}
           isActivated={isActivated}
+          eventId={eventId}
+          eventOptions={eventOptions}
           onSearchChange={(val) =>
             setQueryStates(
               { search: val, page: 1 },
@@ -126,25 +129,8 @@ function PurchasesComponent() {
           onIsActivatedChange={(val) =>
             setQueryStates({ isActivated: val, page: 1 })
           }
+          onEventChange={(val) => setQueryStates({ eventId: val, page: 1 })}
         />
-
-        {eventId && (
-          <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-border/40 bg-card/30 px-4 py-3 text-sm">
-            <span className="text-muted-foreground">
-              Showing purchases for{" "}
-              <span className="font-semibold text-foreground">
-                {filteredEventName ?? "the selected event"}
-              </span>
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setQueryStates({ eventId: null, page: 1 })}
-            >
-              Show all
-            </Button>
-          </div>
-        )}
 
         {results.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-border/40 bg-card/10">

@@ -25,10 +25,13 @@ import { format } from "date-fns"
 interface PurchaseFiltersProps {
   search: string
   dateFrom: string | null
+  eventId: string | null
+  eventOptions: Array<{ id: string; label: string }>
   dateTo: string | null
   isActivated: boolean | null
   onSearchChange: (val: string) => void
   onDateRangeChange: (val: { from?: string; to?: string } | null) => void
+  onEventChange: (val: string | null) => void
   onIsActivatedChange: (val: boolean | null) => void
 }
 
@@ -37,9 +40,12 @@ export function PurchaseFilters({
   dateFrom,
   dateTo,
   isActivated,
+  eventId,
+  eventOptions,
   onSearchChange,
   onDateRangeChange,
   onIsActivatedChange,
+  onEventChange,
 }: PurchaseFiltersProps) {
   const selectedRange = {
     from: dateFrom ? new Date(dateFrom) : undefined,
@@ -47,7 +53,7 @@ export function PurchaseFilters({
   }
 
   return (
-    <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <div className="relative w-full">
         <HugeiconsIcon
           icon={Search01Icon}
@@ -128,6 +134,25 @@ export function PurchaseFilters({
             />
           </Button>
         )}
+      </div>
+
+      <div className="w-full">
+        <Select
+          value={eventId ?? "all"}
+          onValueChange={(val) => onEventChange(val === "all" ? null : val)}
+        >
+          <SelectTrigger className="h-10 w-full border-border/30 bg-background/20 backdrop-blur-2xl transition-colors hover:bg-card/60 focus:border-primary/50">
+            <SelectValue placeholder="All Events" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Events</SelectItem>
+            {eventOptions.map((option) => (
+              <SelectItem key={option.id} value={option.id}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="w-full">
