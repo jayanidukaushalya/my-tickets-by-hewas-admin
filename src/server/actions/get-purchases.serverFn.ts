@@ -11,7 +11,7 @@ import {
 import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
 import { eventDateTime, toEventDateKey } from "@/lib/event-time"
 import { createServerFn } from "@tanstack/react-start"
-import { and, count, desc, eq, exists, gte, ilike, lte, or } from "drizzle-orm"
+import { and, count, desc, eq, gte, ilike, inArray, lte, or } from "drizzle-orm"
 import { z } from "zod"
 
 export const getPurchasesValidator = z.object({
@@ -20,6 +20,7 @@ export const getPurchasesValidator = z.object({
   search: z.string().optional().nullable(),
   dateFrom: z.string().optional().nullable(),
   dateTo: z.string().optional().nullable(),
+  eventId: z.string().optional().nullable(),
   isActivated: z.boolean().optional().nullable(),
 })
 
@@ -33,33 +34,27 @@ export const getPurchasesFn = createServerFn({ method: "GET" })
       const searchPattern = `%${data.search}%`
       conditions.push(
         or(
-          exists(
+          inArray(
+            orderLine.ticketId,
             db
-              .select({ id: event.id })
-              .from(event)
-              .innerJoin(eventDate, eq(event.id, eventDate.eventId))
-              .innerJoin(timeSlot, eq(eventDate.id, timeSlot.eventDateId))
-              .innerJoin(ticket, eq(timeSlot.id, ticket.timeSlotId))
-              .where(
-                and(
-                  eq(ticket.id, orderLine.ticketId),
-                  ilike(event.name, searchPattern)
-                )
-              )
+              .select({ id: ticket.id })
+              .from(ticket)
+              .innerJoin(timeSlot, eq(timeSlot.id, ticket.timeSlotId))
+              .innerJoin(eventDate, eq(eventDate.id, timeSlot.eventDateId))
+              .innerJoin(event, eq(event.id, eventDate.eventId))
+              .where(ilike(event.name, searchPattern))
           ),
-          exists(
+          inArray(
+            orderLine.orderId,
             db
-              .select({ id: customer.id })
-              .from(customer)
-              .innerJoin(order, eq(customer.id, order.customerId))
+              .select({ id: order.id })
+              .from(order)
+              .innerJoin(customer, eq(customer.id, order.customerId))
               .where(
-                and(
-                  eq(order.id, orderLine.orderId),
-                  or(
-                    ilike(customer.email, searchPattern),
-                    ilike(customer.firstName, searchPattern),
-                    ilike(customer.lastName, searchPattern)
-                  )
+                or(
+                  ilike(customer.email, searchPattern),
+                  ilike(customer.firstName, searchPattern),
+                  ilike(customer.lastName, searchPattern)
                 )
               )
           ),
@@ -77,6 +72,20 @@ export const getPurchasesFn = createServerFn({ method: "GET" })
     if (data?.dateTo) {
       const toDate = eventDateTime(toEventDateKey(data.dateTo), "23:59:59.999")
       conditions.push(lte(orderLine.createdAt, toDate))
+    }
+
+    if (data?.eventId) {
+      conditions.push(
+        inArray(
+          orderLine.ticketId,
+          db
+            .select({ id: ticket.id })
+            .from(ticket)
+            .innerJoin(timeSlot, eq(timeSlot.id, ticket.timeSlotId))
+            .innerJoin(eventDate, eq(eventDate.id, timeSlot.eventDateId))
+            .where(eq(eventDate.eventId, data.eventId))
+        )
+      )
     }
 
     if (data?.isActivated !== undefined && data?.isActivated !== null) {

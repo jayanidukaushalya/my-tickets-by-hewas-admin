@@ -4,6 +4,7 @@ import { EventDates } from "@/components/events/event-details/event-dates"
 import { EventDescription } from "@/components/events/event-details/event-description"
 import { EventLanguages } from "@/components/events/event-details/event-languages"
 import { EventLocation } from "@/components/events/event-details/event-location"
+import { EventOverview } from "@/components/events/event-details/event-overview"
 import { EventTickets } from "@/components/events/event-details/event-tickets"
 import { Badge } from "@/components/ui/badge"
 import { isEventExpired } from "@/lib/event-status"
@@ -64,6 +65,7 @@ function EventDetailsPage() {
               </div>
 
               <div className="flex flex-col gap-6 md:col-span-2">
+                <EventOverview event={event} />
                 <EventDates eventDates={event.eventDates} />
                 <EventLocation event={event} readOnly={isExpired} />
                 <EventLanguages event={event} readOnly={isExpired} />

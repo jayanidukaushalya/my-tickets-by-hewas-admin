@@ -1,6 +1,7 @@
 import { DashboardHeader } from "@/components/dashboard-header"
 import { PurchaseFilters } from "@/components/purchases/purchase-filters"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { PaginationControls } from "@/components/ui/pagination-controls"
 import { formatCurrency } from "@/lib/utils"
 import { getPurchasesFn } from "@/server/actions/get-purchases.serverFn"
@@ -31,6 +32,7 @@ const searchParams = {
   limit: parseAsInteger.withDefault(10),
   dateFrom: parseAsString,
   dateTo: parseAsString,
+  eventId: parseAsString,
   isActivated: parseAsBoolean,
 }
 
@@ -44,6 +46,7 @@ export const Route = createFileRoute("/_dashboard/purchases/")({
     search: search.search ?? "",
     dateFrom: search.dateFrom ?? undefined,
     dateTo: search.dateTo ?? undefined,
+    eventId: search.eventId ?? undefined,
     isActivated: search.isActivated ?? undefined,
   }),
   loader: async ({ deps }) => {
@@ -55,6 +58,7 @@ export const Route = createFileRoute("/_dashboard/purchases/")({
           search: deps.search,
           dateFrom: deps.dateFrom,
           dateTo: deps.dateTo,
+          eventId: deps.eventId,
           isActivated: deps.isActivated,
         },
       })
@@ -75,7 +79,11 @@ function PurchasesComponent() {
     clearOnDefault: true,
   })
 
-  const { search, page, limit, dateFrom, dateTo, isActivated } = queryStates
+  const { search, page, limit, dateFrom, dateTo, isActivated, eventId } =
+    queryStates
+  const filteredEventName = eventId
+    ? results[0]?.ticket.timeSlot.eventDate.event.name
+    : undefined
 
   return (
     <>
@@ -119,6 +127,24 @@ function PurchasesComponent() {
             setQueryStates({ isActivated: val, page: 1 })
           }
         />
+
+        {eventId && (
+          <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-border/40 bg-card/30 px-4 py-3 text-sm">
+            <span className="text-muted-foreground">
+              Showing purchases for{" "}
+              <span className="font-semibold text-foreground">
+                {filteredEventName ?? "the selected event"}
+              </span>
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setQueryStates({ eventId: null, page: 1 })}
+            >
+              Show all
+            </Button>
+          </div>
+        )}
 
         {results.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-border/40 bg-card/10">
