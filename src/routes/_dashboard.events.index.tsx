@@ -81,7 +81,6 @@ function EventsComponent() {
     clearOnDefault: true,
   })
 
-  // Destructure for easier use
   const { search, page, limit, eventType, scheduleType, dateFrom, dateTo } =
     queryStates
 
@@ -93,7 +92,6 @@ function EventsComponent() {
     <>
       <DashboardHeader />
       <main className="relative flex flex-1 flex-col overflow-y-auto p-6">
-        {/* Background decoration */}
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute top-[10%] left-[15%] h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="absolute right-[15%] bottom-[10%] h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />
@@ -162,7 +160,6 @@ function EventsComponent() {
               ))}
             </div>
 
-            {/* Pinned to the bottom when content is short, otherwise follows the grid */}
             <div className="mt-auto">
               <PaginationControls
                 page={page}

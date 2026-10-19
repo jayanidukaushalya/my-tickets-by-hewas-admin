@@ -42,7 +42,6 @@ export function StepReview() {
           <ReviewRow label="Description" value={values.description || "—"} />
         </ReviewSection>
 
-        {/* Location */}
         <ReviewSection title="Location">
           <ReviewRow label="Venue" value={values.venue} />
           <ReviewRow label="Address" value={values.address || "—"} />
@@ -52,7 +51,6 @@ export function StepReview() {
           )}
         </ReviewSection>
 
-        {/* Schedule & Tickets */}
         <ReviewSection title="Schedule & Tickets">
           {values.eventDates.map((ed, idx) => (
             <div key={idx} className="space-y-2">

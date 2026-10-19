@@ -3,9 +3,6 @@ import { createMiddleware } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { auth } from "./auth"
 
-/**
- * Middleware to protect admin routes - redirects to login if not authenticated
- */
 export const authMiddleware = createMiddleware().server(async ({ next }) => {
   const headers = getRequestHeaders()
   const session = await auth.api.getSession({ headers })
@@ -21,10 +18,6 @@ export const authMiddleware = createMiddleware().server(async ({ next }) => {
   })
 })
 
-/**
- * Middleware to protect admin server functions. Route middleware only guards
- * document requests, so every server function must use this as well.
- */
 export const adminFnMiddleware = createMiddleware({ type: "function" }).server(
   async ({ next }) => {
     const headers = getRequestHeaders()
@@ -42,9 +35,6 @@ export const adminFnMiddleware = createMiddleware({ type: "function" }).server(
   }
 )
 
-/**
- * Middleware to redirect authenticated users away from login page
- */
 export const redirectIfAuthenticated = createMiddleware().server(
   async ({ next }) => {
     const headers = getRequestHeaders()

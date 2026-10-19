@@ -20,10 +20,6 @@ import { createFileRoute } from "@tanstack/react-router"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
-// ---------------------------------------------------------------------------
-// Validation
-// ---------------------------------------------------------------------------
-
 const lineItemSchema = z.object({
   ticketId: z.string().min(1, "Ticket ID is required"),
   qty: z.number().int().positive("Quantity must be a positive integer"),
@@ -42,7 +38,6 @@ const guestReserveSchema = z.object({
   phone: z.string().min(7, "A valid contact number is required"),
 })
 
-/** Rejects the reservation with an API error and rolls back the transaction. */
 class ReservationError extends Error {
   constructor(
     message: string,
@@ -52,21 +47,11 @@ class ReservationError extends Error {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Route
-// ---------------------------------------------------------------------------
-
 export const Route = createFileRoute("/api/tickets/purchase/reserve")({
   server: {
     handlers: {
       OPTIONS: () => corsPreflightResponse(),
 
-      /**
-       * Step 1 of 2 in the purchase flow.
-       *
-       * - Creates one `order_session` and one `order_session_line` per cart line.
-       * - Verifies availability (sold + active reservations).
-       */
       POST: optionalAuthHandler(async ({ request, user }) => {
         if (!PAYHERE_MERCHANT_ID) {
           return apiError("Payment gateway configuration is missing", 500)
@@ -139,12 +124,8 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
 
           const now = new Date()
           const expireAt = new Date(now.getTime() + 15 * 60 * 1000)
-          // The same ticket listed twice must count against one limit
           const lineItems = mergeLineItems(items)
 
-          // Availability is checked under a row lock in the same transaction
-          // that creates the reservation, so concurrent buyers cannot both
-          // take the last tickets.
           const { session, reservations, totalAmount } = await db.transaction(
             async (tx) => {
               const tickets = await lockTicketsWithAvailability(
@@ -237,8 +218,6 @@ export const Route = createFileRoute("/api/tickets/purchase/reserve")({
               payment: {
                 provider: "payhere",
                 sandbox: PAYHERE_SANDBOX,
-                // The merchant secret stays on the server; the PayHere SDK
-                // does not need it
                 merchantId: PAYHERE_MERCHANT_ID,
                 notifyUrl: `${process.env.SITE_URL ?? "http://localhost:3000"}/api/tickets/purchase/confirm`,
                 orderId: payhereOrderId,

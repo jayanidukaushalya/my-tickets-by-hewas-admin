@@ -4,9 +4,6 @@ import { ulid } from "ulid"
 import { customer } from "./customer.schema"
 import { ticket } from "./ticket.schema"
 
-/**
- * One row per checkout / reservation attempt (expires together).
- */
 export const orderSession = pgTable(
   "order_session",
   {
@@ -26,9 +23,6 @@ export const orderSession = pgTable(
   (table) => [index("order_session_customer_id_idx").on(table.customerId)]
 )
 
-/**
- * Line items for an unpaid reservation (mirrors cart lines).
- */
 export const orderSessionLine = pgTable(
   "order_session_line",
   {

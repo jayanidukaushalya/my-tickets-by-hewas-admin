@@ -20,7 +20,6 @@ export function LocationMap({
         className
       )}
     >
-      {/* Invisible overlay to intercept all pointer events so the map is completely read-only */}
       <div className="pointer-events-auto absolute inset-0 z-10 block" />
       <GoogleMap
         mapContainerStyle={{

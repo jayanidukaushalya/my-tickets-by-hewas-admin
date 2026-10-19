@@ -28,7 +28,7 @@ interface FileUploaderProps {
   onChange: (files: Array<File | ExistingImageRef>) => void
   maxFiles?: number
   accept?: string
-  maxSize?: number // in bytes
+  maxSize?: number
   className?: string
 }
 
@@ -37,10 +37,9 @@ export function FileUploader({
   onChange,
   maxFiles = 10,
   accept = "image/jpeg,image/png,image/webp",
-  maxSize = 5 * 1024 * 1024, // 5MB
+  maxSize = 5 * 1024 * 1024,
   className,
 }: FileUploaderProps) {
-  // Generate unique ID for this instance
   const inputId = useId()
 
   const [files, setFiles] = useState<Array<FileWithPreview>>(() =>
@@ -65,7 +64,6 @@ export function FileUploader({
   const [isDraggingOver, setIsDraggingOver] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Sync internal state when value prop changes (for form reset)
   useEffect(() => {
     const newFiles = value.map((item) => {
       const id = Math.random().toString(36).substring(7)
@@ -90,13 +88,11 @@ export function FileUploader({
       const selectedFiles = Array.from(e.target.files || [])
       setError(null)
 
-      // Check max files
       if (files.length + selectedFiles.length > maxFiles) {
         setError(`You can only upload up to ${maxFiles} file(s)`)
         return
       }
 
-      // Validate files
       const invalidFiles = selectedFiles.filter((file) => file.size > maxSize)
       if (invalidFiles.length > 0) {
         setError(
@@ -119,24 +115,20 @@ export function FileUploader({
         )
       )
 
-      // Reset input
       e.target.value = ""
     },
     [files, maxFiles, maxSize, onChange]
   )
 
-  // Process files helper (shared between input change and drag-drop)
   const processFiles = useCallback(
     (selectedFiles: Array<File>) => {
       setError(null)
 
-      // Check max files
       if (files.length + selectedFiles.length > maxFiles) {
         setError(`You can only upload up to ${maxFiles} file(s)`)
         return
       }
 
-      // Filter by accepted types
       const acceptedTypes = accept.split(",").map((t) => t.trim())
       const invalidTypeFiles = selectedFiles.filter(
         (file) =>
@@ -149,7 +141,6 @@ export function FileUploader({
         return
       }
 
-      // Validate file sizes
       const invalidFiles = selectedFiles.filter((file) => file.size > maxSize)
       if (invalidFiles.length > 0) {
         setError(
@@ -175,7 +166,6 @@ export function FileUploader({
     [files, maxFiles, maxSize, accept, onChange]
   )
 
-  // Handle drag over the dropzone (for file drop)
   const handleDropzoneDragOver = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault()
@@ -187,7 +177,6 @@ export function FileUploader({
     []
   )
 
-  // Handle drag leave the dropzone
   const handleDropzoneDragLeave = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault()
@@ -197,7 +186,6 @@ export function FileUploader({
     []
   )
 
-  // Handle file drop on the dropzone
   const handleDropzoneFileDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault()
@@ -215,7 +203,6 @@ export function FileUploader({
   const removeFile = useCallback(
     (id: string) => {
       const updatedFiles = files.filter((f) => f.id !== id)
-      // Revoke the preview URL to free up memory
       const fileToRemove = files.find((f) => f.id === id)
       if (fileToRemove) {
         URL.revokeObjectURL(fileToRemove.preview)
@@ -267,7 +254,6 @@ export function FileUploader({
         setDraggedId(null)
       }}
     >
-      {/* Upload Button */}
       {canAddMore && (
         <div
           onDragOver={handleDropzoneDragOver}
@@ -323,14 +309,12 @@ export function FileUploader({
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
-      {/* File List */}
       {files.length > 0 && (
         <div className="space-y-2">
           {files.length > 1 && (
@@ -350,7 +334,6 @@ export function FileUploader({
                   draggedId === fileWithPreview.id && "opacity-50"
                 )}
               >
-                {/* Drag Handle */}
                 {maxFiles > 1 && (
                   <HugeiconsIcon
                     icon={Menu01Icon}
@@ -358,7 +341,6 @@ export function FileUploader({
                   />
                 )}
 
-                {/* Image Preview */}
                 <div className="relative shrink-0">
                   <img
                     src={fileWithPreview.preview}
@@ -376,7 +358,6 @@ export function FileUploader({
                   )}
                 </div>
 
-                {/* File Info */}
                 <div className="min-w-0 flex-1">
                   <p
                     className="truncate text-sm font-medium"
@@ -404,7 +385,6 @@ export function FileUploader({
                   </p>
                 </div>
 
-                {/* Remove Button */}
                 <Button
                   type="button"
                   variant="ghost"

@@ -20,17 +20,6 @@ export const Route = createFileRoute("/api/admin/events/$eventId/stats")({
     handlers: {
       OPTIONS: () => corsPreflightResponse(),
 
-      /**
-       * Returns ticket-sale and scan statistics for a single event.
-       *
-       * Response shape:
-       * ```json
-       * {
-       *   "totalSold": 120,
-       *   "totalScanned": 47
-       * }
-       * ```
-       */
       GET: adminHandler(async ({ params }) => {
         const parsed = paramsSchema.safeParse(params)
         if (!parsed.success) {
@@ -39,7 +28,6 @@ export const Route = createFileRoute("/api/admin/events/$eventId/stats")({
 
         const { eventId } = parsed.data
 
-        // Verify the event exists first so we can return a proper 404.
         const eventExists = await db.query.eventDate.findFirst({
           where: eq(eventDate.eventId, eventId),
         })
@@ -48,10 +36,6 @@ export const Route = createFileRoute("/api/admin/events/$eventId/stats")({
           return apiError("Event not found", 404)
         }
 
-        /**
-         * COUNT(*) for order_line rows joined up to the event.
-         * The join path is:  order_line → ticket → time_slot → event_date → event
-         */
         const [totalRow] = await db
           .select({ total: count() })
           .from(orderLine)

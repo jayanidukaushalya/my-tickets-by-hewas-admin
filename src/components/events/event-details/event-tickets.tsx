@@ -57,7 +57,6 @@ function TicketIncreaseForm({
       form.reset()
       onCancelEditing()
 
-      // Background invalidation avoids blocking UI resets
       void router.invalidate()
     } catch {
       toast.error("Failed to increase quantity")

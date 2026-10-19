@@ -71,7 +71,6 @@ export function EventScheduleForm() {
           const scheduleType = watch("scheduleType")
           const paths: FieldPath<EventFormValues>[] = []
 
-          // Build paths for specific fields to trigger (excluding nested tickets)
           eventDates.forEach((_, dIdx) => {
             paths.push(`eventDates.${dIdx}.date`)
             eventDates[dIdx].timeSlots.forEach((_, sIdx) => {
@@ -80,17 +79,15 @@ export function EventScheduleForm() {
             })
           })
 
-          // Trigger base field validation
           const isValid = await trigger(paths)
           if (!isValid) return false
 
-          // Manual check for array length requirements (matching schema refinements)
           if (scheduleType === ScheduleType.MULTI_TIME) {
             const hasMinSlots = eventDates.every(
               (ed) => ed.timeSlots.length >= 2
             )
             if (!hasMinSlots) {
-              await trigger("eventDates") // Trigger to show the array-level errors
+              await trigger("eventDates")
               return false
             }
           }
@@ -170,21 +167,15 @@ export function EventScheduleForm() {
 
   const handleFormKeyDown = useCallback(
     (e: ReactKeyboardEvent<HTMLFormElement>) => {
-      // Avoid accidentally submitting the form when pressing Enter.
-      // This prevents the final step (Review) from auto-executing
-      // when Enter is pressed anywhere other than the submit button.
       if (e.key !== "Enter") return
 
       const target = e.target as HTMLElement | null
       const tag = target?.tagName?.toUpperCase()
 
-      // Allow natural behavior for textareas (newlines)
-      // and buttons (explicit selection/submit)
       if (tag === "TEXTAREA" || tag === "BUTTON") {
         return
       }
 
-      // Prevent default form submission elsewhere
       e.preventDefault()
     },
     []
@@ -197,7 +188,6 @@ export function EventScheduleForm() {
         onKeyDown={handleFormKeyDown}
         className="space-y-8"
       >
-        {/* Step Indicator */}
         <Card className="overflow-hidden border-border/40 bg-card/30 shadow-lg backdrop-blur-2xl">
           <CardContent className="py-2">
             <StepIndicator
@@ -207,7 +197,6 @@ export function EventScheduleForm() {
           </CardContent>
         </Card>
 
-        {/* Step Content */}
         <Card className="overflow-visible border-border/40 bg-card/30 shadow-lg backdrop-blur-2xl">
           <CardContent>
             {currentStep === 0 && <StepBasicInfo />}
@@ -218,7 +207,6 @@ export function EventScheduleForm() {
           </CardContent>
         </Card>
 
-        {/* Navigation */}
         <div className="flex items-center justify-between">
           <Button
             type="button"

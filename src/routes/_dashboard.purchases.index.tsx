@@ -75,14 +75,12 @@ function PurchasesComponent() {
     clearOnDefault: true,
   })
 
-  // Destructure for easier use
   const { search, page, limit, dateFrom, dateTo, isActivated } = queryStates
 
   return (
     <>
       <DashboardHeader />
       <main className="relative flex-1 overflow-y-auto p-6">
-        {/* Background decoration */}
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute top-[10%] left-[15%] h-64 w-64 rounded-full bg-primary/20 opacity-30 blur-3xl" />
           <div className="absolute right-[15%] bottom-[10%] h-96 w-96 rounded-full bg-secondary/10 opacity-30 blur-3xl" />

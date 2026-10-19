@@ -11,7 +11,6 @@ export function StepIndicator({
 }) {
   return (
     <div className="relative flex items-center justify-between">
-      {/* Connecting line */}
       <div className="absolute top-5 right-5 left-5 h-px">
         <div className="absolute inset-0 bg-border/40" />
         <div

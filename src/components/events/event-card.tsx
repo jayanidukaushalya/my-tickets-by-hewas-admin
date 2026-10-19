@@ -15,11 +15,9 @@ type EventData = NonNullable<
 >[number]
 
 export function EventCard({ event }: { event: EventData }) {
-  // Safely extract main date
   const mainDate = event.eventDates?.[0]?.date
   const venue = event.location?.venue ?? "TBD"
 
-  // Calculate total tickets available
   const totalQty =
     event.eventDates?.reduce(
       (acc, dt) =>
@@ -33,7 +31,6 @@ export function EventCard({ event }: { event: EventData }) {
       0
     ) || 0
 
-  // Calculate total tickets sold
   const totalSold =
     event.eventDates?.reduce(
       (acc, dt) =>
@@ -48,7 +45,6 @@ export function EventCard({ event }: { event: EventData }) {
 
   const isSoldOut = totalQty > 0 && totalSold >= totalQty
 
-  // Count total dates
   const totalDates = event.eventDates?.length || 0
 
   return (

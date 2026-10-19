@@ -71,7 +71,6 @@ function LoginComponent() {
 
   return (
     <div className="relative flex h-screen w-full flex-col items-center justify-center bg-background px-4">
-      {/* Background decoration */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-[10%] left-[15%] h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute right-[15%] bottom-[10%] h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />

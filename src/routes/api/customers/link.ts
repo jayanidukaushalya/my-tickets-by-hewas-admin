@@ -12,7 +12,6 @@ import { createFileRoute } from "@tanstack/react-router"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
-// Validation schema for linking customer
 const linkCustomerSchema = z.object({
   email: z.email("Valid email is required"),
   firstName: z.string().optional(),
@@ -25,7 +24,6 @@ export const Route = createFileRoute("/api/customers/link")({
       OPTIONS: () => corsPreflightResponse(),
 
       PUT: privateHandler(async ({ request, user }) => {
-        // Parse and validate request body
         const body = await parseJsonBody(request)
         const parsed = linkCustomerSchema.safeParse(body)
 
@@ -35,7 +33,6 @@ export const Route = createFileRoute("/api/customers/link")({
 
         const { email, firstName, lastName } = parsed.data
 
-        // Find customer by email
         const existingCustomer = await db.query.customer.findFirst({
           where: eq(customer.email, email),
         })
@@ -44,9 +41,7 @@ export const Route = createFileRoute("/api/customers/link")({
           return apiError("No customer found with this email", 404)
         }
 
-        // Check if customer already has a Firebase UID
         if (existingCustomer.firebaseUid) {
-          // Check if it's a different Firebase UID
           if (existingCustomer.firebaseUid !== user.uid) {
             return apiError(
               "Customer already linked to a different Firebase UID",
@@ -54,7 +49,6 @@ export const Route = createFileRoute("/api/customers/link")({
             )
           }
 
-          // Customer already linked to this Firebase UID - update profile if names provided
           if (firstName || lastName) {
             const [updated] = await db
               .update(customer)
@@ -70,7 +64,6 @@ export const Route = createFileRoute("/api/customers/link")({
           return apiSuccess(existingCustomer)
         }
 
-        // Update customer record with Firebase UID and names if provided
         const [updated] = await db
           .update(customer)
           .set({

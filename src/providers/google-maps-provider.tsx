@@ -13,7 +13,6 @@ export function GoogleMapsProvider({
     libraries: GOOGLE_MAPS_LIBRARIES,
   })
 
-  // Prevent children rendering until Google Maps script lands in DOM
   if (loadError) {
     return (
       <div className="flex p-6 text-sm font-medium text-destructive">

@@ -21,19 +21,10 @@ import { createFileRoute } from "@tanstack/react-router"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
-// ---------------------------------------------------------------------------
-// Validation
-// ---------------------------------------------------------------------------
-
 const confirmSchema = z.object({
   orderSessionId: z.string().min(1, "orderSessionId is required"),
 })
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** The reservation lapsed and its tickets were taken by other buyers. */
 class TicketsUnavailableError extends Error {}
 
 type ConfirmedOrder = {
@@ -59,7 +50,6 @@ function confirmedOrderResponse(result: ConfirmedOrder, status: number) {
   )
 }
 
-/** Orders store the reservation ID they were created from. */
 function findOrderForSession(orderSessionId: string) {
   return db.query.order.findFirst({
     where: eq(order.payhereOrderId, orderSessionId),
@@ -67,25 +57,11 @@ function findOrderForSession(orderSessionId: string) {
   })
 }
 
-// ---------------------------------------------------------------------------
-// Route
-// ---------------------------------------------------------------------------
-
 export const Route = createFileRoute("/api/tickets/purchase/confirm")({
   server: {
     handlers: {
       OPTIONS: () => corsPreflightResponse(),
 
-      /**
-       * Step 2 of 2 in the purchase flow.
-       *
-       * - Verifies with PayHere that the reservation was paid in full.
-       * - Creates one `orders` row and one `order_line` per reserved ticket.
-       * - Deletes the `order_session` (cascades to session lines).
-       *
-       * Login is not required (guest checkout), but payment is. Confirming an
-       * already confirmed reservation returns the existing order.
-       */
       POST: publicHandler(async ({ request }) => {
         const body = await parseJsonBody(request)
         const parsed = confirmSchema.safeParse(body)
@@ -121,7 +97,6 @@ export const Route = createFileRoute("/api/tickets/purchase/confirm")({
           0
         )
 
-        // PayHere is the source of truth for whether this reservation was paid
         let payment
         try {
           payment = await findReceivedPayment(orderSessionId, {
@@ -149,8 +124,6 @@ export const Route = createFileRoute("/api/tickets/purchase/confirm")({
         let created: ConfirmedOrder | null
         try {
           created = await db.transaction(async (tx) => {
-            // Claim the reservation; a concurrent confirm of the same session
-            // waits here and then finds nothing to claim.
             const [claimed] = await tx
               .delete(orderSession)
               .where(eq(orderSession.id, orderSessionId))
@@ -160,8 +133,6 @@ export const Route = createFileRoute("/api/tickets/purchase/confirm")({
 
             const now = new Date()
             if (claimed.expireAt <= now) {
-              // Paid after the hold expired: honour it only if the tickets
-              // were not taken by someone else in the meantime.
               const lineItems = mergeLineItems(lines)
               const tickets = await lockTicketsWithAvailability(
                 tx,
@@ -215,7 +186,6 @@ export const Route = createFileRoute("/api/tickets/purchase/confirm")({
         }
 
         if (!created) {
-          // Confirmed concurrently by another request
           const confirmed = await findOrderForSession(orderSessionId)
           return confirmed
             ? confirmedOrderResponse(confirmed, 200)

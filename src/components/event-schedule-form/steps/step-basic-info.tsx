@@ -37,7 +37,6 @@ export function StepBasicInfo() {
       </div>
 
       <FieldGroup className="gap-5">
-        {/* Event Name */}
         <Field orientation="vertical">
           <FieldLabel
             htmlFor="event-name"
@@ -58,7 +57,6 @@ export function StepBasicInfo() {
           </FieldContent>
         </Field>
 
-        {/* Event Image */}
         <Field orientation="vertical">
           <FieldLabel
             htmlFor="event-image"
@@ -84,9 +82,7 @@ export function StepBasicInfo() {
           </FieldContent>
         </Field>
 
-        {/* Event Type & Schedule Type Row */}
         <div className="grid gap-5 sm:grid-cols-2">
-          {/* Event Type */}
           <Field orientation="vertical">
             <FieldLabel
               htmlFor="event-type"
@@ -119,7 +115,6 @@ export function StepBasicInfo() {
             </FieldContent>
           </Field>
 
-          {/* Languages */}
           <Field orientation="vertical">
             <FieldLabel
               htmlFor="event-languages"
@@ -138,7 +133,6 @@ export function StepBasicInfo() {
           </Field>
         </div>
 
-        {/* Schedule Type Selector */}
         <Field orientation="vertical">
           <FieldLabel className="text-xs font-semibold tracking-tighter uppercase opacity-70">
             Schedule Type
@@ -199,7 +193,6 @@ export function StepBasicInfo() {
           </FieldContent>
         </Field>
 
-        {/* Description */}
         <Field orientation="vertical">
           <FieldLabel
             htmlFor="event-description"

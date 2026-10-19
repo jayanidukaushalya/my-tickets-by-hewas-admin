@@ -30,7 +30,6 @@ export function StepLocation() {
       </div>
 
       <FieldGroup className="gap-5">
-        {/* Venue Name */}
         <Field orientation="vertical">
           <FieldLabel
             htmlFor="venue"
@@ -51,7 +50,6 @@ export function StepLocation() {
           </FieldContent>
         </Field>
 
-        {/* Address */}
         <Field orientation="vertical">
           <FieldLabel
             htmlFor="address"
@@ -69,7 +67,6 @@ export function StepLocation() {
           </FieldContent>
         </Field>
 
-        {/* Google Maps picker */}
         <Field orientation="vertical">
           <FieldLabel className="text-xs font-semibold tracking-tighter uppercase opacity-70">
             Pin Location on Map

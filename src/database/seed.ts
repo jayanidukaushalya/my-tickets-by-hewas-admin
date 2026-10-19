@@ -9,7 +9,6 @@ async function seed() {
     const adminPassword = "admin123"
 
     try {
-      // Try to create the user
       const result = await auth.api.signUpEmail({
         body: {
           email: adminEmail,

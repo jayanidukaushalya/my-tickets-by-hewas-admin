@@ -60,7 +60,6 @@ export function DateBlock({
 
   return (
     <div className="group/date relative overflow-hidden rounded-2xl border border-border/40 bg-card/20 backdrop-blur-xl transition-all hover:border-border/60">
-      {/* Date Header */}
       <div className="flex items-center gap-3 border-b border-border/30 bg-muted/20 px-5 py-3">
         <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <HugeiconsIcon
@@ -94,7 +93,6 @@ export function DateBlock({
       </div>
 
       <div className="space-y-4 p-5">
-        {/* Date Picker */}
         <Field orientation="vertical">
           <FieldLabel
             htmlFor={`date-${dateIndex}`}
@@ -133,7 +131,6 @@ export function DateBlock({
                       mode="single"
                       selected={field.value ? parseISO(field.value) : undefined}
                       onSelect={(date) =>
-                        // Plain calendar date; the server applies event time
                         field.onChange(date ? format(date, "yyyy-MM-dd") : "")
                       }
                       disabled={(date) =>
@@ -150,7 +147,6 @@ export function DateBlock({
           </FieldContent>
         </Field>
 
-        {/* Time Slots */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold tracking-wider uppercase opacity-60">

@@ -2,14 +2,6 @@ import { firebaseAuth } from "@/integrations/firebase"
 import type { DecodedIdToken } from "firebase-admin/auth"
 import { apiError } from "./response"
 
-/**
- * Extracts and verifies a Firebase ID token from the `Authorization: Bearer
- * <token>` header of the given request.
- *
- * @returns The decoded `DecodedIdToken` on success, or a ready-to-send error
- * `Response` on failure (so callers can short-circuit with a simple `instanceof
- * Response` check).
- */
 export async function verifyFirebaseToken(
   request: Request
 ): Promise<DecodedIdToken | Response> {

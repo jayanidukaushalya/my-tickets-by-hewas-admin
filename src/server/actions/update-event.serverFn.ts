@@ -47,7 +47,6 @@ export const updateEventAction = createServerFn({ method: "POST" })
       imageUrl = result.url
     }
 
-    // Update event
     const eventUpdates: any = {}
     if (data.description !== undefined) {
       eventUpdates.description = data.description
@@ -63,7 +62,6 @@ export const updateEventAction = createServerFn({ method: "POST" })
       await db.update(event).set(eventUpdates).where(eq(event.id, data.eventId))
     }
 
-    // Update location
     const locationUpdates: any = {}
     if (data.venue !== undefined) locationUpdates.venue = data.venue
     if (data.address !== undefined) locationUpdates.address = data.address

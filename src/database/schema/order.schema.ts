@@ -12,10 +12,6 @@ import { ulid } from "ulid"
 import { customer } from "./customer.schema"
 import { ticket } from "./ticket.schema"
 
-/**
- * Paid order header (one payment / checkout completion).
- * Table name `orders` avoids SQL reserved word `order`.
- */
 export const order = pgTable(
   "orders",
   {
@@ -37,9 +33,6 @@ export const order = pgTable(
   (table) => [index("orders_customer_id_idx").on(table.customerId)]
 )
 
-/**
- * Paid line items (ticket type + qty + unit price snapshot).
- */
 export const orderLine = pgTable(
   "order_line",
   {

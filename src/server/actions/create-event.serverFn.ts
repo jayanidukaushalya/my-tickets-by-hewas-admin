@@ -48,10 +48,7 @@ export const createEventAction = createServerFn({ method: "POST" })
       throw new Error("Event image is required")
     }
 
-    // All rows are written in one transaction so a failure never leaves a
-    // partially created event behind.
     const eventId = await db.transaction(async (tx) => {
-      // 1. Create Event
       const [eventResult] = await tx
         .insert(event)
         .values({
@@ -64,7 +61,6 @@ export const createEventAction = createServerFn({ method: "POST" })
         })
         .returning({ id: event.id })
 
-      // 2. Create Location
       if (data.venue) {
         await tx.insert(locationTable).values({
           eventId: eventResult.id,
@@ -75,11 +71,9 @@ export const createEventAction = createServerFn({ method: "POST" })
         })
       }
 
-      // 3. Create Event Dates, Time Slots, and Tickets
       for (const ed of data.eventDates) {
         if (!ed.date) continue
 
-        // Dates and times are entered in event time (Asia/Colombo)
         const dateKey = toEventDateKey(ed.date)
 
         const [eventDateResult] = await tx
@@ -102,7 +96,6 @@ export const createEventAction = createServerFn({ method: "POST" })
             })
             .returning({ id: timeSlotTable.id })
 
-          // Insert tickets
           for (const tick of ts.tickets) {
             if (!tick.name || !tick.price || !tick.qty) continue
 

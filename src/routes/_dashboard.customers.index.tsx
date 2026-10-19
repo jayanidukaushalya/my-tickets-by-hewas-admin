@@ -12,7 +12,6 @@ function CustomersComponent() {
     <>
       <DashboardHeader />
       <main className="relative flex-1 overflow-y-auto p-6">
-        {/* Background decoration */}
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute top-[15%] left-[20%] h-64 w-64 rounded-full bg-primary/20 opacity-30 blur-3xl" />
           <div className="absolute right-[20%] bottom-[15%] h-96 w-96 rounded-full bg-secondary/10 opacity-30 blur-3xl" />

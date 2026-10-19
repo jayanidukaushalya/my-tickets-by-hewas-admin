@@ -28,8 +28,6 @@ const MAP_CONTAINER_STYLE: React.CSSProperties = {
   height: "100%",
 }
 
-// Map style is now controlled via Cloud Console using the Map ID
-
 export function LocationPicker({
   value,
   onChange,
@@ -62,7 +60,6 @@ export function LocationPicker({
     [onChange]
   )
 
-  /** Reverse geocode a lat/lng to a human-readable address then emit */
   const reverseGeocode = useCallback(
     (pos: google.maps.LatLngLiteral) => {
       const geocoder = new google.maps.Geocoder()
@@ -119,7 +116,6 @@ export function LocationPicker({
 
   return (
     <div className={className}>
-      {/* Map container with search bar floating inside like Google Maps */}
       <div
         className="relative overflow-hidden rounded-xl border border-border/30 shadow-inner"
         style={{ height: 360 }}
@@ -148,7 +144,6 @@ export function LocationPicker({
           )}
         </GoogleMap>
 
-        {/* Floating search bar – overlaid on top of the map, like Google Maps */}
         <div className="absolute top-3 right-3 left-3 z-10">
           <Autocomplete
             onLoad={handleAutocompleteLoad}
@@ -189,7 +184,6 @@ export function LocationPicker({
           </Autocomplete>
         </div>
 
-        {/* Hint overlay — only shown when no pin is placed */}
         {!markerPos && (
           <div className="pointer-events-none absolute right-0 bottom-4 left-0 flex justify-center">
             <div className="rounded-lg bg-card/80 px-4 py-2 text-xs font-medium text-muted-foreground shadow-lg backdrop-blur-sm">

@@ -17,10 +17,6 @@ function formatSlotLabel(slot: {
   return `${start} Onwards`
 }
 
-/**
- * Sends a purchase confirmation email for all lines in a paid `orders` row.
- * Failures are logged and do not throw (payment already succeeded).
- */
 export async function sendPurchasedTicketsConfirmationEmail(
   orderId: string
 ): Promise<void> {

@@ -16,11 +16,11 @@ export const auth = betterAuth({
     enabled: true,
   },
   session: {
-    expiresIn: 60 * 60 * 24, // 1 day in seconds
-    updateAge: 60 * 60, // Update session every hour
+    expiresIn: 60 * 60 * 24,
+    updateAge: 60 * 60,
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 5, // Cache for 5 minutes
+      maxAge: 60 * 5,
     },
   },
   plugins: [tanstackStartCookies(), bearer()],

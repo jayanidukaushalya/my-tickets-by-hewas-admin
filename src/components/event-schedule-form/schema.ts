@@ -45,7 +45,6 @@ export const timeSlotSchema = z
         })
       }),
   })
-  // "HH:mm" strings compare correctly as text
   .refine((slot) => !slot.endTime || slot.endTime > slot.startTime, {
     message: "End time must be after start time",
     path: ["endTime"],

@@ -14,7 +14,6 @@ export const increaseTicketQtyAction = createServerFn({ method: "POST" })
     })
   )
   .handler(async ({ data }) => {
-    // Single atomic update so concurrent increases are not lost
     const updated = await db
       .update(ticket)
       .set({ qty: sql`${ticket.qty} + ${data.addQty}` })

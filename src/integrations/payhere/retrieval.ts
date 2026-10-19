@@ -4,12 +4,6 @@ import {
   PAYHERE_SANDBOX,
 } from "@/configs/env.config"
 
-/**
- * PayHere Payment Retrieval API client, used to verify server-side that a
- * checkout was actually paid before tickets are issued.
- * https://support.payhere.lk/api-&-mobile-sdk/retrieval-api
- */
-
 const BASE_URL = PAYHERE_SANDBOX
   ? "https://sandbox.payhere.lk"
   : "https://www.payhere.lk"
@@ -62,7 +56,6 @@ async function getAccessToken(): Promise<string> {
     expires_in: number
   }
 
-  // Refresh a little before PayHere expires the token
   cachedToken = {
     value: json.access_token,
     expiresAt: Date.now() + Math.max(json.expires_in - 30, 0) * 1000,
@@ -70,10 +63,6 @@ async function getAccessToken(): Promise<string> {
   return json.access_token
 }
 
-/**
- * Returns the received PayHere payment for `orderId` that matches the expected
- * amount and currency, or `null` when no such payment exists.
- */
 export async function findReceivedPayment(
   orderId: string,
   expected: { amount: number; currency: string }
@@ -101,10 +90,8 @@ export async function findReceivedPayment(
     data: Array<PayHerePayment> | null
   }
 
-  // status -1: no payments found for this order ID
   if (json.status !== 1 || !json.data) return null
 
-  // PayHere does not enforce unique order IDs, so several payments may match
   return (
     json.data.find(
       (p) =>

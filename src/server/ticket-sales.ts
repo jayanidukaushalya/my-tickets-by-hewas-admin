@@ -26,10 +26,6 @@ type WithSoldQty<T extends EventWithTickets> = Omit<T, "eventDates"> & {
   >
 }
 
-/**
- * Attaches `soldQty` to every ticket of the given events, aggregated in the
- * database instead of loading every order line.
- */
 export async function attachSoldQty<T extends EventWithTickets>(
   events: Array<T>
 ): Promise<Array<WithSoldQty<T>>> {

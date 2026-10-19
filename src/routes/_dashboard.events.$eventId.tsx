@@ -51,14 +51,12 @@ function EventDetailsPage() {
             </div>
 
             <div className="grid gap-8 md:grid-cols-5">
-              {/* Left Column - Main Details */}
               <div className="flex flex-col gap-8 md:col-span-3">
                 <EventBanner event={event} />
                 <EventDescription event={event} />
                 <EventTickets eventDates={event.eventDates} />
               </div>
 
-              {/* Right Column - Sidebar */}
               <div className="flex flex-col gap-6 md:col-span-2">
                 <EventDates eventDates={event.eventDates} />
                 <EventLocation event={event} />

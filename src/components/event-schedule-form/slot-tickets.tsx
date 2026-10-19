@@ -46,7 +46,6 @@ export function SlotTickets({
 
   return (
     <div className="rounded-xl border border-border/20 bg-background/10 transition-all hover:border-border/40">
-      {/* Slot header */}
       <div className="flex items-center justify-between border-b border-border/20 px-4 py-2.5">
         <div className="flex items-center gap-2">
           <div className="flex size-6 items-center justify-center rounded bg-primary/10 text-[10px] font-bold text-primary">
@@ -78,7 +77,6 @@ export function SlotTickets({
         </Button>
       </div>
 
-      {/* Ticket rows */}
       <div className="space-y-2 p-4">
         {ticketFields.map((ticketField, ticketIndex) => {
           const tErrors = ticketErrors?.[ticketIndex]

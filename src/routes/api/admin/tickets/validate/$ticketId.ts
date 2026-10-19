@@ -28,13 +28,6 @@ export const Route = createFileRoute("/api/admin/tickets/validate/$ticketId")({
     handlers: {
       OPTIONS: () => corsPreflightResponse(),
 
-      /**
-       * Admin scanning + ticket status lookup.
-       *
-       * - Protected by Better Auth bearer token.
-       * - If the ticket is currently `valid`, it marks it `used`
-       *   (`order_line.is_activated = true`) so lists/labels can update.
-       */
       GET: adminHandler(async ({ params }) => {
         const parsedParams = validateParamsSchema.safeParse(params)
         if (!parsedParams.success) {
@@ -91,7 +84,6 @@ export const Route = createFileRoute("/api/admin/tickets/validate/$ticketId")({
             ? "expired"
             : "valid"
 
-        // Activate after determining the label we want to return.
         if (statusBefore === "valid") {
           await db
             .update(orderLine)

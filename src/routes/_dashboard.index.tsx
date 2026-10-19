@@ -5,8 +5,6 @@ import {
   Calendar03Icon,
   ShoppingBag01Icon,
   UserGroupIcon,
-  Search01Icon,
-  Calendar01Icon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { createFileRoute } from "@tanstack/react-router"
@@ -33,7 +31,7 @@ const chartData = [
 const chartConfig = {
   revenue: {
     label: "Revenue",
-    color: "oklch(0.627 0.194 149.214)", // Match primary green
+    color: "oklch(0.627 0.194 149.214)",
   },
 } satisfies ChartConfig
 
@@ -96,7 +94,6 @@ function DashboardComponent() {
             </p>
           </div>
 
-          {/* Stats Grid */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
@@ -152,7 +149,6 @@ function DashboardComponent() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* Chart Area */}
             <div className="flex flex-col gap-4 rounded-3xl border border-border/40 bg-card/30 p-6 backdrop-blur-2xl lg:col-span-2">
               <div className="flex items-center justify-between px-2">
                 <div>
@@ -195,7 +191,6 @@ function DashboardComponent() {
               </ChartContainer>
             </div>
 
-            {/* Recent Purchases Area */}
             <div className="flex flex-col gap-6 rounded-3xl border border-border/40 bg-card/30 p-6 backdrop-blur-2xl">
               <div>
                 <h3 className="text-lg font-bold tracking-tight">Recent Sales</h3>

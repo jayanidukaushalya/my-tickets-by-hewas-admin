@@ -14,7 +14,7 @@ export const timeSlot = pgTable(
       .notNull()
       .references(() => eventDate.id, { onDelete: "cascade" }),
     startTime: timestamp("start_time").notNull(),
-    endTime: timestamp("end_time"), // Optional as seen in some events
+    endTime: timestamp("end_time"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

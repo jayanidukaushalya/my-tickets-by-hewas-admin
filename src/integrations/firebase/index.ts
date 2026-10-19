@@ -7,7 +7,6 @@ import { cert, getApp, getApps, initializeApp } from "firebase-admin/app"
 import { getAuth } from "firebase-admin/auth"
 
 const firebaseApp =
-  // Prevent re-initializing during hot-reload in dev
   getApps().length > 0
     ? getApp()
     : initializeApp({

@@ -17,15 +17,9 @@ export type LockedTicket = {
   price: string
   startTime: Date
   endTime: Date | null
-  /** Tickets left after paid sales and live (unexpired) reservations */
   available: number
 }
 
-/**
- * Locks the given ticket rows for the rest of the transaction and returns
- * their current availability. Concurrent reservations and confirmations for
- * the same tickets wait on the lock, so availability cannot be oversold.
- */
 export async function lockTicketsWithAvailability(
   tx: Transaction,
   ticketIds: Array<string>,
@@ -33,7 +27,6 @@ export async function lockTicketsWithAvailability(
 ): Promise<Map<string, LockedTicket>> {
   if (ticketIds.length === 0) return new Map()
 
-  // Lock in a stable order to avoid deadlocks between concurrent requests
   const rows = await tx
     .select({
       id: ticket.id,
@@ -91,7 +84,6 @@ export async function lockTicketsWithAvailability(
   )
 }
 
-/** Combines cart lines that reference the same ticket. */
 export function mergeLineItems(
   items: Array<{ ticketId: string; qty: number }>
 ): Array<{ ticketId: string; qty: number }> {

@@ -19,7 +19,7 @@ export const event = pgTable(
     image: text("image").notNull(),
     eventType: eventTypeEnum("event_type").notNull(),
     scheduleType: scheduleTypeEnum("schedule_type").notNull(),
-    languages: text("languages"), // english, sinhala, tamil, hindi, other
+    languages: text("languages"),
     description: text("description"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
