@@ -13,6 +13,6 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit"
   },
-  "cSpell.words": ["Hugeicons", "Nuqs", "treeify"],
+  "cSpell.words": ["Hewas", "Hugeicons", "Nuqs", "treeify"],
   "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

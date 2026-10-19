@@ -78,6 +78,11 @@ function LoginComponent() {
 
       <div className="w-full max-w-sm space-y-6 text-center">
         <div className="space-y-1">
+          <img
+            src="/my-tickets-by-hewas-logo.png"
+            alt="M-Tickets"
+            className="mx-auto mb-4 h-20 w-auto rounded-2xl shadow-lg"
+          />
           <h1 className="text-4xl font-black tracking-tight uppercase">
             M-Tickets
           </h1>

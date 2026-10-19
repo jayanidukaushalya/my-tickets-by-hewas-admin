@@ -76,13 +76,11 @@ export function AppSidebar() {
                 size="lg"
                 className="cursor-default hover:bg-transparent active:bg-transparent"
               >
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                  <HugeiconsIcon
-                    icon={ShoppingBag01Icon}
-                    className="size-5"
-                    strokeWidth={2.5}
-                  />
-                </div>
+                <img
+                  src="/my-tickets-by-hewas-logo.png"
+                  alt="M-Tickets"
+                  className="h-8 w-auto shrink-0 rounded-md object-contain group-data-[collapsible=icon]:w-8"
+                />
                 <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-black tracking-tight uppercase">
                     M-Tickets
