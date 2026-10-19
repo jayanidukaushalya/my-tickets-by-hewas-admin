@@ -18,6 +18,7 @@ type WithSoldQty<T extends EventWithTickets> = Omit<T, "eventDates"> & {
           tickets: Array<
             T["eventDates"][number]["timeSlots"][number]["tickets"][number] & {
               soldQty: number
+              usedQty: number
             }
           >
         }
@@ -36,17 +37,22 @@ export async function attachSoldQty<T extends EventWithTickets>(
   )
 
   const soldByTicket = new Map<string, number>()
+  const usedByTicket = new Map<string, number>()
   if (ticketIds.length > 0) {
     const rows = await db
       .select({
         ticketId: orderLine.ticketId,
         soldQty: sql<number>`coalesce(sum(${orderLine.qty}), 0)::int`,
+        usedQty: sql<number>`coalesce(sum(${orderLine.qty}) filter (where ${orderLine.isActivated}), 0)::int`,
       })
       .from(orderLine)
       .where(inArray(orderLine.ticketId, ticketIds))
       .groupBy(orderLine.ticketId)
 
-    for (const row of rows) soldByTicket.set(row.ticketId, row.soldQty)
+    for (const row of rows) {
+      soldByTicket.set(row.ticketId, row.soldQty)
+      usedByTicket.set(row.ticketId, row.usedQty)
+    }
   }
 
   return events.map((e) => ({
@@ -58,6 +64,7 @@ export async function attachSoldQty<T extends EventWithTickets>(
         tickets: s.tickets.map((t) => ({
           ...t,
           soldQty: soldByTicket.get(t.id) ?? 0,
+          usedQty: usedByTicket.get(t.id) ?? 0,
         })),
       })),
     })),

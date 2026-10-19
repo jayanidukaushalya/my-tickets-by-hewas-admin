@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { cn, formatCurrency } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
 import { getEventFn } from "@/server/actions/get-event.serverFn"
 import { ChartBarLineIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -14,6 +14,7 @@ export function EventOverview({ event }: { event: EventType }) {
 
   const totalQty = tickets.reduce((sum, t) => sum + t.qty, 0)
   const sold = tickets.reduce((sum, t) => sum + t.soldQty, 0)
+  const used = tickets.reduce((sum, t) => sum + t.usedQty, 0)
   const revenue = tickets.reduce(
     (sum, t) => sum + t.soldQty * Number(t.price),
     0
@@ -22,7 +23,8 @@ export function EventOverview({ event }: { event: EventType }) {
   const stats = [
     { label: "Tickets sold", value: `${sold} / ${totalQty}` },
     { label: "Available", value: String(Math.max(0, totalQty - sold)) },
-    { label: "Revenue", value: formatCurrency(revenue), wide: true },
+    { label: "Used", value: `${used} / ${sold}` },
+    { label: "Revenue", value: formatCurrency(revenue) },
   ]
 
   return (
@@ -39,10 +41,7 @@ export function EventOverview({ event }: { event: EventType }) {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className={cn(
-              "rounded-xl border border-border/20 bg-background/10 p-3",
-              stat.wide && "col-span-2"
-            )}
+            className="rounded-xl border border-border/20 bg-background/10 p-3"
           >
             <p className="text-xs text-muted-foreground">{stat.label}</p>
             <p className="mt-1 text-lg font-semibold">{stat.value}</p>
