@@ -4,7 +4,7 @@ import {
   corsPreflightResponse,
   publicHandler,
 } from "@/server/api"
-import { getEventFn } from "@/server/actions/get-event.serverFn"
+import { findEvent } from "@/server/actions/get-event.serverFn"
 import { createFileRoute } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/api/events/$eventId")({
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/events/$eventId")({
         const { eventId } = params
 
         try {
-          const event = await getEventFn({ data: { eventId } })
+          const event = await findEvent(eventId)
           return apiSuccess(event)
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e)

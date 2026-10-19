@@ -1,5 +1,5 @@
 import {
-  getEventsFn,
+  findEvents,
   getEventsValidator,
 } from "@/server/actions/get-events.serverFn"
 import {
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/events/")({
           return apiValidationError(parsed.error.flatten())
         }
 
-        const data = await getEventsFn({ data: parsed.data })
+        const data = await findEvents(parsed.data)
         return apiSuccess(data)
       }),
     },

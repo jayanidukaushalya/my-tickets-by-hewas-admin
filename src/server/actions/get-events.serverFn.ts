@@ -32,98 +32,97 @@ export const getEventsValidator = z.object({
   dateTo: z.string().optional().nullable(),
 })
 
-export const getEventsFn = createServerFn({ method: "GET" })
-  .middleware([adminFnMiddleware])
-  .inputValidator(getEventsValidator)
-  .handler(async ({ data }) => {
-    const conditions = []
+export async function findEvents(data: z.infer<typeof getEventsValidator>) {
+  const conditions = []
 
-    if (data?.search) {
-      conditions.push(ilike(event.name, `%${data.search}%`))
-    }
+  if (data?.search) {
+    conditions.push(ilike(event.name, `%${data.search}%`))
+  }
 
-    if (data?.eventType && data.eventType.length > 0) {
-      conditions.push(inArray(event.eventType, data.eventType))
-    }
+  if (data?.eventType && data.eventType.length > 0) {
+    conditions.push(inArray(event.eventType, data.eventType))
+  }
 
-    if (data?.scheduleType) {
-      conditions.push(eq(event.scheduleType, data.scheduleType))
-    }
+  if (data?.scheduleType) {
+    conditions.push(eq(event.scheduleType, data.scheduleType))
+  }
 
-    if (data?.dateFrom || data?.dateTo) {
-      const dateConditions = [eq(eventDate.eventId, event.id)]
-      if (data?.dateFrom) {
-        dateConditions.push(
-          gte(eventDate.date, eventDateTime(toEventDateKey(data.dateFrom)))
-        )
-      }
-      if (data?.dateTo) {
-        const toDate = eventDateTime(
-          toEventDateKey(data.dateTo),
-          "23:59:59.999"
-        )
-        dateConditions.push(lte(eventDate.date, toDate))
-      }
-      conditions.push(
-        exists(
-          db
-            .select()
-            .from(eventDate)
-            .where(and(...dateConditions))
-        )
+  if (data?.dateFrom || data?.dateTo) {
+    const dateConditions = [eq(eventDate.eventId, event.id)]
+    if (data?.dateFrom) {
+      dateConditions.push(
+        gte(eventDate.date, eventDateTime(toEventDateKey(data.dateFrom)))
       )
     }
-
-    const where = conditions.length > 0 ? and(...conditions) : undefined
-
-    let orderByClause: any[] = [desc(event.createdAt)]
-    if (data?.field && data?.order) {
-      const orderFn = data.order === "desc" ? desc : asc
-      switch (data.field) {
-        case "name":
-          orderByClause = [orderFn(event.name)]
-          break
-        case "createdAt":
-        default:
-          orderByClause = [orderFn(event.createdAt)]
-          break
-      }
+    if (data?.dateTo) {
+      const toDate = eventDateTime(toEventDateKey(data.dateTo), "23:59:59.999")
+      dateConditions.push(lte(eventDate.date, toDate))
     }
+    conditions.push(
+      exists(
+        db
+          .select()
+          .from(eventDate)
+          .where(and(...dateConditions))
+      )
+    )
+  }
 
-    const limit = data?.limit || 8
-    const offset = data?.page ? (data.page - 1) * limit : 0
+  const where = conditions.length > 0 ? and(...conditions) : undefined
 
-    const [events, [{ count: total }]] = await Promise.all([
-      db.query.event.findMany({
-        where,
-        orderBy: orderByClause,
-        limit,
-        offset,
-        with: {
-          eventDates: {
-            with: {
-              timeSlots: {
-                with: {
-                  tickets: true,
-                },
+  let orderByClause: any[] = [desc(event.createdAt)]
+  if (data?.field && data?.order) {
+    const orderFn = data.order === "desc" ? desc : asc
+    switch (data.field) {
+      case "name":
+        orderByClause = [orderFn(event.name)]
+        break
+      case "createdAt":
+      default:
+        orderByClause = [orderFn(event.createdAt)]
+        break
+    }
+  }
+
+  const limit = data?.limit || 8
+  const offset = data?.page ? (data.page - 1) * limit : 0
+
+  const [events, [{ count: total }]] = await Promise.all([
+    db.query.event.findMany({
+      where,
+      orderBy: orderByClause,
+      limit,
+      offset,
+      with: {
+        eventDates: {
+          with: {
+            timeSlots: {
+              with: {
+                tickets: true,
               },
             },
           },
-          location: true,
         },
-      }),
-      db
-        .select({
-          count: count(),
-        })
-        .from(event)
-        .where(where),
-    ])
+        location: true,
+      },
+    }),
+    db
+      .select({
+        count: count(),
+      })
+      .from(event)
+      .where(where),
+  ])
 
-    const results = await attachSoldQty(events)
+  const results = await attachSoldQty(events)
 
-    return {
-      results,
-      total,
-    }
-  })
+  return {
+    results,
+    total,
+  }
+}
+
+export const getEventsFn = createServerFn({ method: "GET" })
+  .middleware([adminFnMiddleware])
+  .inputValidator(getEventsValidator)
+  .handler(({ data }) => findEvents(data))
