@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/events/")({
           return apiValidationError(parsed.error.flatten())
         }
 
-        const data = await findEvents(parsed.data)
+        const data = await findEvents(parsed.data, { activeOnly: true })
         return apiSuccess(data)
       }),
     },

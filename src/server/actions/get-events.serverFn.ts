@@ -1,5 +1,5 @@
 import { db } from "@/database"
-import { event, eventDate } from "@/database/schema"
+import { event, eventDate, timeSlot } from "@/database/schema"
 import { EventType } from "@/enums/event-type.enum"
 import { ScheduleType } from "@/enums/schedule-type.enum"
 import { adminFnMiddleware } from "@/integrations/better-auth/auth-middleware"
@@ -17,6 +17,7 @@ import {
   ilike,
   inArray,
   lte,
+  sql,
 } from "drizzle-orm"
 import { z } from "zod"
 
@@ -32,8 +33,28 @@ export const getEventsValidator = z.object({
   dateTo: z.string().optional().nullable(),
 })
 
-export async function findEvents(data: z.infer<typeof getEventsValidator>) {
+export async function findEvents(
+  data: z.infer<typeof getEventsValidator>,
+  options: { activeOnly?: boolean } = {}
+) {
   const conditions = []
+
+  if (options.activeOnly) {
+    conditions.push(
+      exists(
+        db
+          .select()
+          .from(eventDate)
+          .innerJoin(timeSlot, eq(timeSlot.eventDateId, eventDate.id))
+          .where(
+            and(
+              eq(eventDate.eventId, event.id),
+              sql`coalesce(${timeSlot.endTime}, ${timeSlot.startTime}) > now()`
+            )
+          )
+      )
+    )
+  }
 
   if (data?.search) {
     conditions.push(ilike(event.name, `%${data.search}%`))

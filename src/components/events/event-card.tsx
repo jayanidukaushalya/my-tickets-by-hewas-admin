@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { formatEnum } from "@/lib/utils"
+import { cn, formatEnum } from "@/lib/utils"
 import { getEventsFn } from "@/server/actions/get-events.serverFn"
 import {
   Calendar03Icon,
@@ -47,8 +47,22 @@ export function EventCard({ event }: { event: EventData }) {
 
   const totalDates = event.eventDates?.length || 0
 
+  const slotEnds =
+    event.eventDates?.flatMap((dt) =>
+      (dt.timeSlots ?? []).map((ts) =>
+        new Date(ts.endTime ?? ts.startTime).getTime()
+      )
+    ) ?? []
+  const isExpired =
+    slotEnds.length > 0 && slotEnds.every((end) => end <= Date.now())
+
   return (
-    <div className="group flex flex-col overflow-hidden rounded-3xl border border-border/50 bg-card/40 shadow-2xl backdrop-blur-2xl transition-all hover:-translate-y-1 hover:bg-card/60 hover:shadow-xl">
+    <div
+      className={cn(
+        "group flex flex-col overflow-hidden rounded-3xl border border-border/50 bg-card/40 shadow-2xl backdrop-blur-2xl transition-all hover:-translate-y-1 hover:bg-card/60 hover:shadow-xl",
+        isExpired && "opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
+      )}
+    >
       <div className="relative aspect-video w-full overflow-hidden bg-muted/30">
         <img
           src={event.image || "https://placehold.co/600x400?text=No+Image"}
