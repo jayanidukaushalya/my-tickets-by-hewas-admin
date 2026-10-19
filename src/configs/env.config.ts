@@ -37,6 +37,10 @@ export const CLOUDFLARE_R2_PUBLIC_URL = process.env
 
 export const PAYHERE_MERCHANT_ID = process.env.PAYHERE_MERCHANT_ID
 export const PAYHERE_MERCHANT_SECRET = process.env.PAYHERE_MERCHANT_SECRET
+// Business App credentials (Settings > API Keys) for the Payment Retrieval API
+export const PAYHERE_APP_ID = process.env.PAYHERE_APP_ID
+export const PAYHERE_APP_SECRET = process.env.PAYHERE_APP_SECRET
+export const PAYHERE_SANDBOX = process.env.PAYHERE_SANDBOX !== "false"
 
 export const RESEND_API_KEY = process.env.RESEND_API_KEY as string
 export const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL as string
