@@ -24,7 +24,7 @@ const searchParams = {
   search: parseAsString.withDefault(""),
   page: parseAsInteger.withDefault(1),
   limit: parseAsInteger.withDefault(8),
-  field: parseAsString.withDefault("createdAt"),
+  field: parseAsString.withDefault("date"),
   order: parseAsStringEnum<SortOrder>(Object.values(SortOrder)).withDefault(
     SortOrder.DESC
   ),
@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_dashboard/events/")({
     page: search.page ?? 1,
     limit: search.limit ?? 8,
     search: search.search ?? "",
-    field: search.field ?? "createdAt",
+    field: search.field ?? "date",
     order: search.order ?? SortOrder.DESC,
     eventType: search.eventType ?? undefined,
     scheduleType: search.scheduleType ?? undefined,

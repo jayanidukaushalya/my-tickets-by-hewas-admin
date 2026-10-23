@@ -91,16 +91,31 @@ export async function findEvents(
 
   const where = conditions.length > 0 ? and(...conditions) : undefined
 
-  let orderByClause: any[] = [desc(event.createdAt)]
-  if (data?.field && data?.order) {
+  const today = eventDateTime(toEventDateKey(new Date().toISOString()))
+  const nextDate = sql`(${db
+    .select({ value: sql`min(${eventDate.date})` })
+    .from(eventDate)
+    .where(and(eq(eventDate.eventId, event.id), gte(eventDate.date, today)))})`
+  const lastDate = sql`(${db
+    .select({ value: sql`max(${eventDate.date})` })
+    .from(eventDate)
+    .where(eq(eventDate.eventId, event.id))})`
+
+  let orderByClause: any[] = [
+    asc(nextDate),
+    desc(lastDate),
+    desc(event.createdAt),
+    desc(event.id),
+  ]
+  if (data?.field && data.field !== "date" && data?.order) {
     const orderFn = data.order === "desc" ? desc : asc
     switch (data.field) {
       case "name":
-        orderByClause = [orderFn(event.name)]
+        orderByClause = [orderFn(event.name), orderFn(event.id)]
         break
       case "createdAt":
       default:
-        orderByClause = [orderFn(event.createdAt)]
+        orderByClause = [orderFn(event.createdAt), orderFn(event.id)]
         break
     }
   }
