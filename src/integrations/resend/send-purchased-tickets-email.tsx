@@ -1,8 +1,9 @@
 import { db } from "@/database"
 import { orderLine } from "@/database/schema"
-import { formatCurrency } from "@/lib/utils"
 import { formatInEventTime } from "@/lib/event-time"
+import { formatCurrency } from "@/lib/utils"
 import { eq } from "drizzle-orm"
+import QRCode from "qrcode"
 import { sendEmail } from "./client"
 import PurchasedTicketsEmail from "./templates/purchased-tickets-email"
 
@@ -15,6 +16,32 @@ function formatSlotLabel(slot: {
     return `${start} — ${formatInEventTime(slot.endTime, "h:mm a")}`
   }
   return `${start} Onwards`
+}
+
+function toFileSlug(value: string): string {
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "ticket"
+  )
+}
+
+async function buildTicketQrAttachments(
+  rows: { id: string; ticket: { name: string } }[]
+) {
+  return Promise.all(
+    rows.map(async (row, index) => ({
+      filename: `${String(index + 1).padStart(2, "0")}-${toFileSlug(row.ticket.name)}-qr.png`,
+      content: await QRCode.toBuffer(row.id, {
+        type: "png",
+        errorCorrectionLevel: "M",
+        margin: 1,
+        width: 512,
+      }),
+      contentType: "image/png",
+    }))
+  )
 }
 
 export async function sendPurchasedTicketsConfirmationEmail(
@@ -123,9 +150,12 @@ export async function sendPurchasedTicketsConfirmationEmail(
     ? `Your tickets — ${lines.length} item(s)`
     : `Your tickets — ${primaryEvent.name}`
 
+  const attachments = await buildTicketQrAttachments(rows)
+
   await sendEmail({
     to: emailTo,
     subject,
+    attachments,
     react: (
       <PurchasedTicketsEmail
         customerName={customerName}

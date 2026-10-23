@@ -1,5 +1,6 @@
 import { RESEND_API_KEY, RESEND_FROM_EMAIL } from "@/configs/env.config"
 import { Resend } from "resend"
+import type { Attachment } from "resend"
 import type { ReactElement } from "react"
 
 export const resend = new Resend(RESEND_API_KEY)
@@ -9,6 +10,7 @@ interface SendEmailOptions {
   subject: string
   react: ReactElement
   replyTo?: string
+  attachments?: Attachment[]
 }
 
 export async function sendEmail({
@@ -16,6 +18,7 @@ export async function sendEmail({
   subject,
   react,
   replyTo,
+  attachments,
 }: SendEmailOptions) {
   const { data, error } = await resend.emails.send({
     from: RESEND_FROM_EMAIL,
@@ -23,6 +26,7 @@ export async function sendEmail({
     subject,
     react,
     ...(replyTo ? { replyTo } : {}),
+    ...(attachments?.length ? { attachments } : {}),
   })
 
   if (error) {
